@@ -27,7 +27,7 @@ export class TodoService {
     createTodoInput: CreateTodoInput,
     userId: string,
   ): Promise<TodoDocument> {
-    if (userId) {
+    if (!userId) {
       throw new ForbiddenException('User not authorized');
     }
     const todoForDb = { ...createTodoInput, completed: false, author: userId };
