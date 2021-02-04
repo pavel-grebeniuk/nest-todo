@@ -15,18 +15,18 @@ import { UpdateTodoInput } from './dto/updateTodo.input';
 export class TodoService {
   constructor(@InjectModel(Todo.name) private todoModel: Model<TodoDocument>) {}
 
-  async getTodos(userId: string): Promise<Todo[]> {
+  async getTodos(userId: string): Promise<TodoDocument[]> {
     return this.todoModel.find({ author: userId }).exec();
   }
 
-  async getTodoById(id: string): Promise<Todo> {
+  async getTodoById(id: string): Promise<TodoDocument> {
     return this.todoModel.findOne({ _id: id });
   }
 
   async createTodo(
     createTodoInput: CreateTodoInput,
     userId: string,
-  ): Promise<Todo> {
+  ): Promise<TodoDocument> {
     if (userId) {
       throw new ForbiddenException('User not authorized');
     }
@@ -41,12 +41,12 @@ export class TodoService {
   async updateTodo(
     updateTodoInput: UpdateTodoInput,
     id: string,
-  ): Promise<Todo> {
+  ): Promise<TodoDocument> {
     await this.todoModel.updateOne({ _id: id }, updateTodoInput);
     return this.getTodoById(id);
   }
 
-  async removeTodo(id: string): Promise<Todo> {
+  async removeTodo(id: string): Promise<TodoDocument> {
     const todo = await this.todoModel.findOneAndDelete({ _id: id });
     if (!todo) {
       throw new NotFoundException(`Todo id: ${id} not found`);
