@@ -8,7 +8,9 @@ import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/tododb'),
+    MongooseModule.forRoot('mongodb://localhost:27017/tododb', {
+      useFindAndModify: false,
+    }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.graphql',
       context: ({ req }) => ({ headers: req.headers }),

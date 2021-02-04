@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { AuthTokenDto } from './dto/authToken.dto';
 import { CreateUserInput } from '../user/dto/createUser.dto';
-import { UserDocument } from '../user/schemas/user.schema';
+import { User } from '../user/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -50,7 +50,7 @@ export class AuthService {
     return bcrypt.compare(password, userPassword);
   }
 
-  private async generateToken(user: Partial<UserDocument>) {
+  private async generateToken(user: Partial<User>) {
     const { email, id } = user;
     return {
       access_token: this.jwtService.sign({ email, id }),

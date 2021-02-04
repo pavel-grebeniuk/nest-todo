@@ -7,19 +7,21 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 
-import { TodoDocument, Todo } from './schemas/todo.schema';
+import { Todo } from './schemas/todo.schema';
 import { CreateTodoInput } from './dto/createTodo.input';
 import { UpdateTodoInput } from './dto/updateTodo.input';
 
 @Injectable()
 export class TodoService {
-  constructor(@InjectModel(Todo.name) private todoModel: Model<TodoDocument>) {}
+  constructor(
+    @InjectModel(Todo.name) private readonly todoModel: Model<Todo>,
+  ) {}
 
-  async getTodos(userId: string): Promise<TodoDocument[]> {
+  async getTodos(userId: string): Promise<Todo[]> {
     return this.todoModel.find({ author: userId }).exec();
   }
 
-  async getTodoById(id: string): Promise<TodoDocument> {
+  async getTodoById(id: string): Promise<Todo> {
     try {
       const todo = await this.todoModel.findById(id);
       return todo;
@@ -31,7 +33,7 @@ export class TodoService {
   async createTodo(
     createTodoInput: CreateTodoInput,
     userId: string,
-  ): Promise<TodoDocument> {
+  ): Promise<Todo> {
     if (!userId) {
       throw new ForbiddenException('User not authorized');
     }
@@ -46,16 +48,17 @@ export class TodoService {
   async updateTodo(
     updateTodoInput: UpdateTodoInput,
     id: string,
-  ): Promise<TodoDocument> {
-    try {
-      await this.todoModel.updateOne({ _id: id }, updateTodoInput);
-    } catch (e) {
-      throw new NotFoundException();
+  ): Promise<Todo> {
+    const todo = await this.todoModel
+      .findOneAndUpdate({ _id: id }, { $set: updateTodoInput }, { new: true })
+      .exec();
+    if (!todo) {
+      throw new NotFoundException(`Todo ${id} not found`);
     }
-    return this.getTodoById(id);
+    return todo;
   }
 
-  async removeTodo(id: string): Promise<TodoDocument> {
+  async removeTodo(id: string): Promise<Todo> {
     const todo = await this.todoModel.findOneAndDelete({ _id: id });
     if (!todo) {
       throw new NotFoundException(`Todo id: ${id} not found`);
