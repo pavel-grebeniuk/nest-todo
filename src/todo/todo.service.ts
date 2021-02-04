@@ -20,7 +20,12 @@ export class TodoService {
   }
 
   async getTodoById(id: string): Promise<TodoDocument> {
-    return this.todoModel.findOne({ _id: id });
+    try {
+      const todo = await this.todoModel.findById(id);
+      return todo;
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 
   async createTodo(
@@ -42,7 +47,11 @@ export class TodoService {
     updateTodoInput: UpdateTodoInput,
     id: string,
   ): Promise<TodoDocument> {
-    await this.todoModel.updateOne({ _id: id }, updateTodoInput);
+    try {
+      await this.todoModel.updateOne({ _id: id }, updateTodoInput);
+    } catch (e) {
+      throw new NotFoundException();
+    }
     return this.getTodoById(id);
   }
 

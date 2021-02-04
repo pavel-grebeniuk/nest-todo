@@ -7,6 +7,6 @@ import { CreateTodoInput } from './createTodo.input';
 export class UpdateTodoInput extends PartialType(CreateTodoInput) {
   @IsOptional()
   @IsBoolean()
-  @Field()
+  @Field({ nullable: true })
   completed?: boolean;
 }

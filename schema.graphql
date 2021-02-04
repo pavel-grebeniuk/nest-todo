@@ -44,7 +44,7 @@ input CreateTodoInput {
 input UpdateTodoInput {
   title: String
   description: String
-  completed: Boolean!
+  completed: Boolean
 }
 
 input CreateUserInput {
