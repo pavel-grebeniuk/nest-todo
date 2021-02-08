@@ -18,7 +18,7 @@ type Todo {
   author: User!
 }
 
-type AuthTokenDto {
+type AuthTokenInterface {
   access_token: String!
 }
 
@@ -32,8 +32,8 @@ type Mutation {
   createTodo(createTodoInput: CreateTodoInput!): Todo!
   updateTodo(id: String!, updateTodoInput: UpdateTodoInput!): Todo!
   removeTodo(id: String!): Todo!
-  signIn(password: String!, email: String!): AuthTokenDto!
-  signUp(createUserInput: CreateUserInput!): AuthTokenDto!
+  signIn(password: String!, email: String!): AuthTokenInterface!
+  signUp(createUserInput: CreateUserInput!): AuthTokenInterface!
 }
 
 input CreateTodoInput {

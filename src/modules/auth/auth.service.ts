@@ -7,9 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 import { UserService } from '../user/user.service';
-import { AuthTokenDto } from './dto/authToken.dto';
 import { CreateUserInput } from '../user/dto/createUser.dto';
 import { User } from '../user/schemas/user.schema';
+import { AuthTokenInterface } from './interfaces/authToken.interface';
 
 @Injectable()
 export class AuthService {
@@ -18,13 +18,16 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(userEmail: string, password: string): Promise<AuthTokenDto> {
+  async signIn(
+    userEmail: string,
+    password: string,
+  ): Promise<AuthTokenInterface> {
     const user = await this.validateUser(userEmail, password);
     const token = await this.generateToken(user);
     return token;
   }
 
-  async signUp(createUserInput: CreateUserInput): Promise<AuthTokenDto> {
+  async signUp(createUserInput: CreateUserInput): Promise<AuthTokenInterface> {
     const user = await this.userService.createUser(createUserInput);
     if (!user) {
       throw new UnauthorizedException();
