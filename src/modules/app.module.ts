@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, UnauthorizedException } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -23,7 +23,17 @@ import { CommonModule } from './common/common.module';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.graphql',
-      context: ({ req }) => ({ headers: req.headers }),
+      installSubscriptionHandlers: true,
+      context: ({ req, connection }) => {
+        if (connection && !connection.context?.authorization) {
+          throw new UnauthorizedException(
+            'Request headers must include an authorization field',
+          );
+        }
+        return {
+          headers: connection ? connection.context : req.headers,
+        };
+      },
     }),
     ScheduleModule.forRoot(),
     TodoModule,

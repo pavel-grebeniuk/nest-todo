@@ -5,10 +5,15 @@ import * as moment from 'moment';
 
 import { Todo } from '../../todo/schemas/todo.schema';
 import { TodoStatus } from '../../todo/types/todoStatus.enum';
+import { PubSubService } from './pubSub.service';
+import { TODO_EXPIRED } from '../constants/subscriptionTriggers';
 
 @Injectable()
 export class UpdateExpiredTodoService {
-  constructor(@InjectModel(Todo.name) private todoModel: Model<Todo>) {}
+  constructor(
+    @InjectModel(Todo.name) private todoModel: Model<Todo>,
+    private pubSubService: PubSubService,
+  ) {}
   async updateExpiredTodos() {
     try {
       await this.todoModel
@@ -23,7 +28,9 @@ export class UpdateExpiredTodoService {
         )
         .exec((error, data) => {
           if (data.nModified) {
-            console.log(data);
+            this.pubSubService.publish(TODO_EXPIRED, {
+              updateTodos: true,
+            });
           }
         });
     } catch (e) {

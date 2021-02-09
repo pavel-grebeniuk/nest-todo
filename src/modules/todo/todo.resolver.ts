@@ -6,6 +6,7 @@ import {
   Query,
   ResolveField,
   Resolver,
+  Subscription,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 
@@ -16,6 +17,8 @@ import { UpdateTodoInput } from './dto/updateTodo.input';
 import { AuthGuard } from '../auth/auth.guard';
 import { User } from '../user/models/user.model';
 import { UserService } from '../user/user.service';
+import { PubSubService } from '../common/services/pubSub.service';
+import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
 
 @UseGuards(AuthGuard)
 @Resolver((of) => Todo)
@@ -23,6 +26,7 @@ export class TodoResolver {
   constructor(
     private todoService: TodoService,
     private userService: UserService,
+    private pubSubService: PubSubService,
   ) {}
 
   @Query((returns) => [Todo], { name: 'todos' })
@@ -59,5 +63,12 @@ export class TodoResolver {
   @ResolveField()
   async author(@Parent() { author }) {
     return this.userService.getUserById(author);
+  }
+
+  @Subscription((returns) => Boolean, {
+    name: 'updateTodos',
+  })
+  updateTodosStatusHandler() {
+    return this.pubSubService.subscribe(TODO_EXPIRED);
   }
 }
