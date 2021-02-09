@@ -26,19 +26,14 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
-
-```bash
-$ yarn
-```
 
 ## Running the app
 
 ```bash
-# up mongo
-$ yarn mongo
+# yarn up
+$ start application
 
-# development
-$ yarn start:dev
+# yarn down
+$ stop application
 ```
 
