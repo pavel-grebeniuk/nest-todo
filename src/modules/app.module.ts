@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -23,9 +25,11 @@ import { UserModule } from './user/user.module';
       autoSchemaFile: 'schema.graphql',
       context: ({ req }) => ({ headers: req.headers }),
     }),
+    ScheduleModule.forRoot(),
     TodoModule,
     UserModule,
     AuthModule,
+    CommonModule,
   ],
 })
 export class AppModule {}

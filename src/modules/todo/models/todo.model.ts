@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 import { User } from '../../user/models/user.model';
+import { TodoStatus } from '../types/todoStatus.enum';
 
 @ObjectType()
 export class Todo {
@@ -13,8 +14,8 @@ export class Todo {
   @Field({ nullable: true })
   description?: string;
 
-  @Field()
-  completed: boolean;
+  @Field((type) => TodoStatus)
+  status: TodoStatus;
 
   @Field({ nullable: true })
   expiredDate?: string;

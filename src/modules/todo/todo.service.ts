@@ -10,6 +10,7 @@ import * as moment from 'moment';
 import { Todo } from './schemas/todo.schema';
 import { CreateTodoInput } from './dto/createTodo.input';
 import { UpdateTodoInput } from './dto/updateTodo.input';
+import { TodoStatus } from './types/todoStatus.enum';
 
 @Injectable()
 export class TodoService {
@@ -37,9 +38,13 @@ export class TodoService {
     if (!userId) {
       throw new ForbiddenException('User not authorized');
     }
-    const todoForDb = { ...createTodoInput, completed: false, author: userId };
+    const todoForDb = {
+      ...createTodoInput,
+      status: TodoStatus.NEW,
+      author: userId,
+    };
     if (!createTodoInput.expiredDate) {
-      todoForDb.expiredDate = moment().add(1, 'd').toISOString();
+      todoForDb.expiredDate = moment().add(1, 'm').toISOString();
     }
     const createdTodo = new this.todoModel(todoForDb);
     return createdTodo.save();

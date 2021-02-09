@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { TodoStatus } from '../types/todoStatus.enum';
 
 @Schema()
 export class Todo extends Document {
@@ -10,7 +11,7 @@ export class Todo extends Document {
   description: string;
 
   @Prop()
-  completed: boolean;
+  status: TodoStatus;
 
   @Prop()
   expiredDate: string;
