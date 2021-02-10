@@ -9,6 +9,11 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    environment:
+      - MONGODB_CONNECTION_STRING=mongodb://mongodb_service:27017
+      - PORT=3000
+      - JWT_SECRET=secret
+      - TOKEN_EXPIRED_IN=1d
     depends_on:
       - mongodb_service
     volumes:
@@ -16,6 +21,7 @@ services:
   mongodb_service:
     image: mongo:latest
     restart: unless-stopped
+#    access to db outside the container
 #    ports:
 #      - "27017:27017"
     volumes:

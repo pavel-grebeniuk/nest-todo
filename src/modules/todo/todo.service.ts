@@ -47,7 +47,7 @@ export class TodoService {
       author: userId,
     };
     if (!createTodoInput.expiredDate) {
-      todoForDb.expiredDate = moment().add(1, 'm').toISOString();
+      todoForDb.expiredDate = moment().add(1, 'h').toISOString();
     }
     const createdTodo = await this.todoRepository.create(todoForDb);
     return this.todoRepository.save(createdTodo);
@@ -71,7 +71,7 @@ export class TodoService {
       throw new NotFoundException(`Todo id: ${id} not found`);
     }
     await this.todoRepository.remove(todo);
-    return todo;
+    return { ...todo, id };
   }
 
   async getExpiredTodos() {
