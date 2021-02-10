@@ -1,5 +1,4 @@
 import { Module, UnauthorizedException } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -8,6 +7,9 @@ import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TodoEntity } from './todo/entities/todo.entity';
+import { UserEntity } from './user/entities/user.entity';
 
 @Module({
   imports: [
@@ -15,9 +17,14 @@ import { CommonModule } from './common/common.module';
       envFilePath: '.env.dev',
       isGlobal: true,
     }),
-    MongooseModule.forRootAsync({
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_CONNECTION_STRING'),
+        type: 'mongodb',
+        url: configService.get<string>('MONGODB_CONNECTION_STRING'),
+        synchronize: true,
+        useUnifiedTopology: true,
+        entities: [TodoEntity, UserEntity],
       }),
       inject: [ConfigService],
     }),

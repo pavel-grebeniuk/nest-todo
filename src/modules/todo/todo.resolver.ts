@@ -10,44 +10,41 @@ import {
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 
-import { Todo } from './models/todo.model';
+import { TodoEntity } from './entities/todo.entity';
 import { TodoService } from './todo.service';
 import { CreateTodoInput } from './dto/createTodo.input';
 import { UpdateTodoInput } from './dto/updateTodo.input';
 import { AuthGuard } from '../auth/auth.guard';
-import { User } from '../user/models/user.model';
+import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
-import { PubSubService } from '../common/services/pubSub.service';
-import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
 
 @UseGuards(AuthGuard)
-@Resolver((of) => Todo)
+@Resolver((of) => TodoEntity)
 export class TodoResolver {
   constructor(
     private todoService: TodoService,
     private userService: UserService,
-    private pubSubService: PubSubService,
   ) {}
 
-  @Query((returns) => [Todo], { name: 'todos' })
-  async getTodos(@Context('user') { id }: Partial<User>) {
+  @Query((returns) => [TodoEntity], { name: 'todos' })
+  async getTodos(@Context('user') { id }: Partial<UserEntity>) {
     return this.todoService.getTodos(id);
   }
 
-  @Query((returns) => Todo, { name: 'todo' })
+  @Query((returns) => TodoEntity, { name: 'todo' })
   async getTodoById(@Args('id') id: string) {
     return this.todoService.getTodoById(id);
   }
 
-  @Mutation((returns) => Todo)
+  @Mutation((returns) => TodoEntity)
   async createTodo(
     @Args('createTodoInput') createTodoInput: CreateTodoInput,
-    @Context('user') { id: userId }: Partial<User>,
+    @Context('user') { id: userId }: Partial<UserEntity>,
   ) {
     return this.todoService.createTodo(createTodoInput, userId);
   }
 
-  @Mutation((returns) => Todo)
+  @Mutation((returns) => TodoEntity)
   async updateTodo(
     @Args('updateTodoInput') updateTodoInput: UpdateTodoInput,
     @Args('id') id: string,
@@ -55,7 +52,7 @@ export class TodoResolver {
     return this.todoService.updateTodo(updateTodoInput, id);
   }
 
-  @Mutation((returns) => Todo)
+  @Mutation((returns) => TodoEntity)
   async removeTodo(@Args('id') id: string) {
     return this.todoService.removeTodo(id);
   }
@@ -65,10 +62,15 @@ export class TodoResolver {
     return this.userService.getUserById(author);
   }
 
-  @Subscription((returns) => Boolean, {
-    name: 'updateTodos',
+  @Subscription((returns) => [TodoEntity], {
+    name: 'expiredTodos',
+    resolve: (payload, _, context) => {
+      return payload.expiredTodos.filter(
+        (todo) => todo.author === context.user.id,
+      );
+    },
   })
-  updateTodosStatusHandler() {
-    return this.pubSubService.subscribe(TODO_EXPIRED);
+  expiredTodosHandler(@Context('user') { id }: Partial<UserEntity>) {
+    return this.todoService.getExpiredTodos();
   }
 }

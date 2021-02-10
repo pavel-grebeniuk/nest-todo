@@ -3,38 +3,41 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 
-import { Todo } from './schemas/todo.schema';
 import { CreateTodoInput } from './dto/createTodo.input';
 import { UpdateTodoInput } from './dto/updateTodo.input';
 import { TodoStatus } from './types/todoStatus.enum';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { TodoEntity } from './entities/todo.entity';
+import { PubSubService } from '../common/services/pubSub.service';
+import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
 
 @Injectable()
 export class TodoService {
   constructor(
-    @InjectModel(Todo.name) private readonly todoModel: Model<Todo>,
+    @InjectRepository(TodoEntity)
+    private todoRepository: Repository<TodoEntity>,
+    private pubSubService: PubSubService,
   ) {}
 
-  async getTodos(userId: string): Promise<Todo[]> {
-    return this.todoModel.find({ author: userId }).exec();
+  async getTodos(userId: string): Promise<TodoEntity[]> {
+    return this.todoRepository.find({ author: userId });
   }
 
-  async getTodoById(id: string): Promise<Todo> {
-    try {
-      const todo = await this.todoModel.findById(id);
-      return todo;
-    } catch (e) {
+  async getTodoById(id: string): Promise<TodoEntity> {
+    const todo = await this.todoRepository.findOne(id);
+    if (!todo) {
       throw new NotFoundException();
     }
+    return todo;
   }
 
   async createTodo(
     createTodoInput: CreateTodoInput,
     userId: string,
-  ): Promise<Todo> {
+  ): Promise<TodoEntity> {
     if (!userId) {
       throw new ForbiddenException('User not authorized');
     }
@@ -46,28 +49,32 @@ export class TodoService {
     if (!createTodoInput.expiredDate) {
       todoForDb.expiredDate = moment().add(1, 'm').toISOString();
     }
-    const createdTodo = new this.todoModel(todoForDb);
-    return createdTodo.save();
+    const createdTodo = await this.todoRepository.create(todoForDb);
+    return this.todoRepository.save(createdTodo);
   }
 
   async updateTodo(
     updateTodoInput: UpdateTodoInput,
     id: string,
-  ): Promise<Todo> {
-    const todo = await this.todoModel
-      .findOneAndUpdate({ _id: id }, { $set: updateTodoInput }, { new: true })
-      .exec();
+  ): Promise<TodoEntity> {
+    let todo = await this.getTodoById(id);
     if (!todo) {
       throw new NotFoundException(`Todo ${id} not found`);
     }
-    return todo;
+    todo = { ...todo, ...updateTodoInput };
+    return this.todoRepository.save(todo);
   }
 
-  async removeTodo(id: string): Promise<Todo> {
-    const todo = await this.todoModel.findOneAndDelete({ _id: id });
+  async removeTodo(id: string): Promise<TodoEntity> {
+    const todo = await this.getTodoById(id);
     if (!todo) {
       throw new NotFoundException(`Todo id: ${id} not found`);
     }
+    await this.todoRepository.remove(todo);
     return todo;
+  }
+
+  async getExpiredTodos() {
+    return this.pubSubService.subscribe(TODO_EXPIRED);
   }
 }

@@ -12,8 +12,8 @@ export class CreateTodoInput {
   @Field({ nullable: true })
   description?: string;
 
-  @IsString()
   @IsOptional()
   @IsDateString()
+  @Field({ nullable: true })
   expiredDate: string;
 }

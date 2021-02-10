@@ -1,38 +1,35 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Repository } from 'typeorm';
 import * as moment from 'moment';
 
-import { Todo } from '../../todo/schemas/todo.schema';
 import { TodoStatus } from '../../todo/types/todoStatus.enum';
 import { PubSubService } from './pubSub.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TodoEntity } from '../../todo/entities/todo.entity';
 import { TODO_EXPIRED } from '../constants/subscriptionTriggers';
 
 @Injectable()
 export class UpdateExpiredTodoService {
   constructor(
-    @InjectModel(Todo.name) private todoModel: Model<Todo>,
+    @InjectRepository(TodoEntity)
+    private todosRepository: Repository<TodoEntity>,
     private pubSubService: PubSubService,
   ) {}
   async updateExpiredTodos() {
     try {
-      await this.todoModel
-        .updateMany(
-          {
-            expiredDate: { $lte: moment().toISOString() },
-            status: { $ne: TodoStatus.EXPIRED },
-          },
-          {
-            status: TodoStatus.EXPIRED,
-          },
-        )
-        .exec((error, data) => {
-          if (data.nModified) {
-            this.pubSubService.publish(TODO_EXPIRED, {
-              updateTodos: true,
-            });
-          }
+      const todos = await this.todosRepository.find({
+        where: {
+          status: { $ne: TodoStatus.EXPIRED },
+          expiredDate: { $lt: moment().toISOString() },
+        },
+      });
+      if (todos.length) {
+        todos.forEach((todo) => (todo.status = TodoStatus.EXPIRED));
+        await this.todosRepository.save(todos);
+        this.pubSubService.publish(TODO_EXPIRED, {
+          expiredTodos: todos,
         });
+      }
     } catch (e) {
       throw new BadRequestException();
     }

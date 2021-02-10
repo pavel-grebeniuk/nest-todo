@@ -1,18 +1,19 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
-import { User } from './schemas/user.schema';
 import { CreateUserInput } from './dto/createUser.dto';
+import { UserEntity } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
-  async createUser(createUserInput: CreateUserInput): Promise<User> {
+  async createUser(createUserInput: CreateUserInput): Promise<UserEntity> {
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(createUserInput.password, salt);
@@ -22,18 +23,18 @@ export class UserService {
         `User with email ${createUserInput.email} already exists`,
       );
     }
-    const createdUser = new this.userModel({
+    const newUser = await this.userRepository.create({
       ...createUserInput,
       password: hash,
     });
-    return await createdUser.save();
+    return this.userRepository.save(newUser);
   }
 
-  async findUser(email: string): Promise<User> {
-    return this.userModel.findOne({ email }).exec();
+  async findUser(email: string): Promise<UserEntity> {
+    return this.userRepository.findOne({ email });
   }
 
-  async getUserById(id: string): Promise<User> {
-    return this.userModel.findById(id);
+  async getUserById(id: string): Promise<UserEntity> {
+    return this.userRepository.findOne(id);
   }
 }
