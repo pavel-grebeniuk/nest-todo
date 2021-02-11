@@ -10,10 +10,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - MONGODB_CONNECTION_STRING=mongodb://mongodb_service:27017
-      - PORT=3000
-      - JWT_SECRET=secret
-      - TOKEN_EXPIRED_IN=1d
+      MONGODB_CONNECTION_STRING: mongodb://mongodb_service:27017
+      PORT: 3000
+      JWT_SECRET: secret
+      TOKEN_EXPIRED_IN: 1d
     depends_on:
       - mongodb_service
     volumes:
