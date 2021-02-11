@@ -19,7 +19,7 @@ export class UpdateExpiredTodoService {
     try {
       const todos = await this.todosRepository.find({
         where: {
-          status: { $ne: TodoStatus.EXPIRED },
+          status: TodoStatus.NEW,
           expiredDate: { $lt: moment().toISOString() },
         },
       });
