@@ -1,7 +1,7 @@
 version: '3.9'
 
 volumes:
-  mongodb_volume:
+  postgres_volume:
 services:
   api:
     build: .
@@ -10,20 +10,24 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - MONGODB_CONNECTION_STRING=mongodb://mongodb_service:27017
-      - PORT=3000
-      - JWT_SECRET=secret
-      - TOKEN_EXPIRED_IN=1d
+      DB_HOST: postgres_service
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres
+      PORT: 3000
+      JWT_SECRET: secret
+      TOKEN_EXPIRED_IN: 1d
     depends_on:
-      - mongodb_service
+      - postgres_service
     volumes:
       - ./src:/usr/src/app/src
-  mongodb_service:
-    image: mongo:latest
-    restart: unless-stopped
-#    access to db outside the container
-#    ports:
-#      - "27017:27017"
+  postgres_service:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
     volumes:
-      - mongodb_volume:/data/db
-
+      - postgres_volume:/data/db

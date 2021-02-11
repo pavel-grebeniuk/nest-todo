@@ -19,33 +19,36 @@ import { UserEntity } from './user/entities/user.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        type: 'mongodb',
-        url: configService.get<string>('MONGODB_CONNECTION_STRING'),
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: +configService.get<string>('DB_PORT'),
+        username: configService.get<string>('DB_USER'),
+        password: configService.get<string>('DB_PASS'),
+        database: 'postgres',
+        entities: [],
         synchronize: true,
-        useUnifiedTopology: true,
-        entities: [TodoEntity, UserEntity],
       }),
       inject: [ConfigService],
     }),
-    GraphQLModule.forRoot({
-      autoSchemaFile: 'schema.graphql',
-      installSubscriptionHandlers: true,
-      context: ({ req, connection }) => {
-        if (connection && !connection.context?.authorization) {
-          throw new UnauthorizedException(
-            'Request headers must include an authorization field',
-          );
-        }
-        return {
-          headers: connection ? connection.context : req.headers,
-        };
-      },
-    }),
-    ScheduleModule.forRoot(),
-    TodoModule,
-    UserModule,
-    AuthModule,
-    CommonModule,
+    // GraphQLModule.forRoot({
+    //   autoSchemaFile: 'schema.graphql',
+    //   installSubscriptionHandlers: true,
+    //   context: ({ req, connection }) => {
+    //     if (connection && !connection.context?.authorization) {
+    //       throw new UnauthorizedException(
+    //         'Request headers must include an authorization field',
+    //       );
+    //     }
+    //     return {
+    //       headers: connection ? connection.context : req.headers,
+    //     };
+    //   },
+    // }),
+    // ScheduleModule.forRoot(),
+    // TodoModule,
+    // UserModule,
+    // AuthModule,
+    // CommonModule,
   ],
 })
 export class AppModule {}
