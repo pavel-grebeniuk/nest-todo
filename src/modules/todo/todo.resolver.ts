@@ -32,7 +32,7 @@ export class TodoResolver {
   }
 
   @Query((returns) => TodoEntity, { name: 'todo' })
-  async getTodoById(@Args('id') id: string) {
+  async getTodoById(@Args('id') id: number) {
     return this.todoService.getTodoById(id);
   }
 
@@ -47,20 +47,20 @@ export class TodoResolver {
   @Mutation((returns) => TodoEntity)
   async updateTodo(
     @Args('updateTodoInput') updateTodoInput: UpdateTodoInput,
-    @Args('id') id: string,
+    @Args('id') id: number,
   ) {
-    return this.todoService.updateTodo(updateTodoInput, id);
+    return this.todoService.updateTodo(updateTodoInput, +id);
   }
 
   @Mutation((returns) => TodoEntity)
-  async removeTodo(@Args('id') id: string) {
+  async removeTodo(@Args('id') id: number) {
     return this.todoService.removeTodo(id);
   }
 
-  @ResolveField()
-  async author(@Parent() { author }) {
-    return this.userService.getUserById(author);
-  }
+  // @ResolveField()
+  // async author(@Parent() { author }) {
+  //   return this.userService.getUserById(author);
+  // }
 
   @Subscription((returns) => [TodoEntity], {
     name: 'expiredTodos',

@@ -2,21 +2,27 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 
 import { UserEntity } from '../../user/entities/user.entity';
 import { TodoStatus } from '../types/todoStatus.enum';
-import { Column, Entity, ObjectIdColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @ObjectType('Todo')
 @Entity()
 export class TodoEntity {
-  @ObjectIdColumn()
+  @PrimaryGeneratedColumn()
   @Field((type) => ID)
-  id: string;
+  id: number;
 
   @Field()
   @Column()
   title: string;
 
   @Field({ nullable: true })
-  @Column()
+  @Column({ nullable: true })
   description?: string;
 
   @Field((type) => TodoStatus)
@@ -28,6 +34,6 @@ export class TodoEntity {
   expiredDate?: string;
 
   @Field((type) => UserEntity)
-  @Column()
-  author?: string;
+  @ManyToOne((type) => UserEntity, (user) => user.todos)
+  author?: UserEntity;
 }

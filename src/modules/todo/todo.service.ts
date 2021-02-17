@@ -22,12 +22,19 @@ export class TodoService {
     private pubSubService: PubSubService,
   ) {}
 
-  async getTodos(userId: string): Promise<TodoEntity[]> {
-    return this.todoRepository.find({ author: userId });
+  async getTodos(userId: number): Promise<TodoEntity[]> {
+    return this.todoRepository.find(
+      {
+        relations: ['author'],
+      },
+      // { author: userId }
+    );
   }
 
-  async getTodoById(id: string): Promise<TodoEntity> {
-    const todo = await this.todoRepository.findOne(id);
+  async getTodoById(id: number): Promise<TodoEntity> {
+    const todo = await this.todoRepository.findOne(id, {
+      relations: ['author'],
+    });
     if (!todo) {
       throw new NotFoundException();
     }
@@ -36,7 +43,7 @@ export class TodoService {
 
   async createTodo(
     createTodoInput: CreateTodoInput,
-    userId: string,
+    userId: number,
   ): Promise<TodoEntity> {
     if (!userId) {
       throw new ForbiddenException('User not authorized');
@@ -44,7 +51,7 @@ export class TodoService {
     const todoForDb = {
       ...createTodoInput,
       status: TodoStatus.NEW,
-      author: userId,
+      // author: userId,
     };
     if (!createTodoInput.expiredDate) {
       todoForDb.expiredDate = moment().add(1, 'h').toISOString();
@@ -55,23 +62,22 @@ export class TodoService {
 
   async updateTodo(
     updateTodoInput: UpdateTodoInput,
-    id: string,
+    id: number,
   ): Promise<TodoEntity> {
-    let todo = await this.getTodoById(id);
+    const todo = await this.todoRepository.preload({ id, ...updateTodoInput });
     if (!todo) {
       throw new NotFoundException(`Todo ${id} not found`);
     }
-    todo = { ...todo, ...updateTodoInput };
     return this.todoRepository.save(todo);
   }
 
-  async removeTodo(id: string): Promise<TodoEntity> {
+  async removeTodo(id: number): Promise<TodoEntity> {
     const todo = await this.getTodoById(id);
     if (!todo) {
       throw new NotFoundException(`Todo id: ${id} not found`);
     }
     await this.todoRepository.remove(todo);
-    return { ...todo, id };
+    return { ...todo, id: +id };
   }
 
   async getExpiredTodos() {
