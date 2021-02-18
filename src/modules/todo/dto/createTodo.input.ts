@@ -1,5 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsDateString, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayUnique,
+  IsDateString,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 @InputType()
 export class CreateTodoInput {
@@ -16,4 +21,10 @@ export class CreateTodoInput {
   @IsDateString()
   @Field({ nullable: true })
   expiredDate: string;
+
+  @ArrayUnique()
+  @IsString({ each: true })
+  @IsOptional()
+  @Field((type) => [String])
+  categories: string[];
 }

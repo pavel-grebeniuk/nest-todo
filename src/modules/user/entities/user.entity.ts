@@ -21,6 +21,7 @@ export class UserEntity {
   @Field()
   password: string;
 
+  @Field((type) => [TodoEntity])
   @OneToMany((type) => TodoEntity, (todo) => todo.author)
   todos: TodoEntity[];
 }

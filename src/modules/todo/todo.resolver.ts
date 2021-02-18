@@ -2,9 +2,7 @@ import {
   Args,
   Context,
   Mutation,
-  Parent,
   Query,
-  ResolveField,
   Resolver,
   Subscription,
 } from '@nestjs/graphql';
@@ -17,6 +15,7 @@ import { UpdateTodoInput } from './dto/updateTodo.input';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
+import { DefaultCategoryPipe } from '../common/pipes/defaultCategory.pipe';
 
 @UseGuards(AuthGuard)
 @Resolver((of) => TodoEntity)
@@ -38,7 +37,8 @@ export class TodoResolver {
 
   @Mutation((returns) => TodoEntity)
   async createTodo(
-    @Args('createTodoInput') createTodoInput: CreateTodoInput,
+    @Args('createTodoInput', DefaultCategoryPipe)
+    createTodoInput: CreateTodoInput,
     @Context('user') { id: userId }: Partial<UserEntity>,
   ) {
     return this.todoService.createTodo(createTodoInput, userId);
@@ -57,16 +57,16 @@ export class TodoResolver {
     return this.todoService.removeTodo(id);
   }
 
-  // @ResolveField()
-  // async author(@Parent() { author }) {
-  //   return this.userService.getUserById(author);
-  // }
-
   @Subscription((returns) => [TodoEntity], {
     name: 'expiredTodos',
+    filter: (payload, _, context) => {
+      return payload.expiredTodos.some(
+        (todo) => todo.author.id === context.user.id,
+      );
+    },
     resolve: (payload, _, context) => {
       return payload.expiredTodos.filter(
-        (todo) => todo.author === context.user.id,
+        (todo) => todo.author.id === context.user.id,
       );
     },
   })

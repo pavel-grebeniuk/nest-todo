@@ -35,6 +35,9 @@ export class UserService {
   }
 
   async getUserById(id: number): Promise<UserEntity> {
-    return this.userRepository.findOne(id);
+    const data = await this.userRepository.findOne(id, {
+      relations: ['todos'],
+    });
+    return data;
   }
 }

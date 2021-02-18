@@ -5,10 +5,12 @@ import { TodoStatus } from '../types/todoStatus.enum';
 import {
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { CategoryEntity } from '../../category/entities/category.entity';
 
 @ObjectType('Todo')
 @Entity()
@@ -36,4 +38,11 @@ export class TodoEntity {
   @Field((type) => UserEntity)
   @ManyToOne((type) => UserEntity, (user) => user.todos)
   author?: UserEntity;
+
+  @Field((type) => [CategoryEntity])
+  @ManyToMany((type) => CategoryEntity, (category) => category.todos, {
+    cascade: true,
+  })
+  @JoinTable()
+  category: CategoryEntity[];
 }
