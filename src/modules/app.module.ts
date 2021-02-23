@@ -8,9 +8,6 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TodoEntity } from './todo/entities/todo.entity';
-import { UserEntity } from './user/entities/user.entity';
-import { CategoryEntity } from './category/entities/category.entity';
 import { CategoryModule } from './category/category.module';
 
 @Module({
@@ -27,7 +24,7 @@ import { CategoryModule } from './category/category.module';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASS'),
         database: 'postgres',
-        entities: [TodoEntity, UserEntity, CategoryEntity],
+        autoLoadEntities: true,
         synchronize: true,
       }),
       inject: [ConfigService],

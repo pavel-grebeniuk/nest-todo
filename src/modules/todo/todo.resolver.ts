@@ -15,7 +15,8 @@ import { UpdateTodoInput } from './dto/updateTodo.input';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
-import { DefaultCategoryPipe } from '../common/pipes/defaultCategory.pipe';
+import { DefaultCategoryPipe } from '../category/pipes/defaultCategory.pipe';
+import { UniqTodoNamePipe } from './pipes/uniqTodoName.pipe';
 
 @UseGuards(AuthGuard)
 @Resolver((of) => TodoEntity)
@@ -37,7 +38,7 @@ export class TodoResolver {
 
   @Mutation((returns) => TodoEntity)
   async createTodo(
-    @Args('createTodoInput', DefaultCategoryPipe)
+    @Args('createTodoInput', DefaultCategoryPipe, UniqTodoNamePipe)
     createTodoInput: CreateTodoInput,
     @Context('user') { id: userId }: Partial<UserEntity>,
   ) {

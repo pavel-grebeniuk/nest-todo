@@ -44,6 +44,15 @@ export class TodoService {
     return todo;
   }
 
+  async getTodoByName(title: string, userId: number): Promise<TodoEntity> {
+    return this.todoRepository.findOne({
+      where: {
+        title,
+        author: userId,
+      },
+    });
+  }
+
   async createTodo(
     createTodoInput: CreateTodoInput,
     userId: number,
