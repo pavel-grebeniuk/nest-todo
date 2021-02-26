@@ -5,9 +5,8 @@ import { PubSubService } from './services/pubSub.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TodoEntity } from '../todo/entities/todo.entity';
 import { TodoModule } from '../todo/todo.module';
-import { TodoService } from '../todo/todo.service';
 import { FilesService } from './services/files.service';
-import { PublicFile } from './publicFile.entity';
+import { PublicFile } from './entities/publicFile.entity';
 
 @Module({
   imports: [

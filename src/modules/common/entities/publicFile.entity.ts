@@ -1,9 +1,9 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Field, ObjectType } from '@nestjs/graphql';
 
-import { TodoEntity } from '../todo/entities/todo.entity';
+import { TodoEntity } from '../../todo/entities/todo.entity';
 
-@Entity()
+@Entity('PublicFiles')
 @ObjectType('File')
 export class PublicFile {
   @PrimaryGeneratedColumn()

@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
-import { LessThan, Repository } from 'typeorm';
+import { Connection, LessThan, Repository } from 'typeorm';
+import { FileUpload } from 'graphql-upload';
 
 import { CreateTodoInput } from './dto/createTodo.input';
 import { UpdateTodoInput } from './dto/updateTodo.input';
@@ -17,8 +18,6 @@ import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
 import { UserService } from '../user/user.service';
 import { CategoryService } from '../category/category.service';
 import { FilesService } from '../common/services/files.service';
-import { Stream } from 'stream';
-import { FileUpload } from 'graphql-upload';
 
 @Injectable()
 export class TodoService {
@@ -29,18 +28,19 @@ export class TodoService {
     private userService: UserService,
     private categoryService: CategoryService,
     private filesService: FilesService,
+    private connection: Connection,
   ) {}
 
   async getTodos(userId: number): Promise<TodoEntity[]> {
     return this.todoRepository.find({
       where: { author: userId },
-      relations: ['author', 'category'],
+      relations: ['author'],
     });
   }
 
   async getTodoById(id: number): Promise<TodoEntity> {
     const todo = await this.todoRepository.findOne(id, {
-      relations: ['author', 'category'],
+      relations: ['author'],
     });
     if (!todo) {
       throw new NotFoundException();
@@ -68,7 +68,6 @@ export class TodoService {
     const categories = await this.categoryService.getCategoriesByName(
       createTodoInput.categories,
     );
-
     const todoForDb = {
       ...createTodoInput,
       author: user,
@@ -87,9 +86,20 @@ export class TodoService {
     updateTodoInput: UpdateTodoInput,
     id: number,
   ): Promise<TodoEntity> {
-    const todo = await this.todoRepository.preload({ id, ...updateTodoInput });
+    const { categories, ...inputData } = updateTodoInput;
+    const todo = await this.todoRepository.preload({
+      id,
+      ...inputData,
+    });
     if (!todo) {
       throw new NotFoundException(`Todo ${id} not found`);
+    }
+    if (categories?.length) {
+      const categoriesList = await this.categoryService.getCategoriesByName(
+        categories,
+      );
+      todo.category = categoriesList;
+      await this.categoryService.assignTodo(todo, categoriesList);
     }
     return this.todoRepository.save(todo);
   }
@@ -139,5 +149,20 @@ export class TodoService {
     const todo = await this.getTodoById(todoId);
     todo.images = [...todo.images, ...images];
     return this.todoRepository.save(todo);
+  }
+
+  async getTodosCountByStatus(
+    userId: number,
+    status: TodoStatus,
+  ): Promise<number> {
+    return this.connection
+      .createQueryBuilder()
+      .select('todo')
+      .from(TodoEntity, 'todo')
+      .where('todo.authorId=:userId AND todo.status=:status', {
+        userId,
+        status,
+      })
+      .getCount();
   }
 }

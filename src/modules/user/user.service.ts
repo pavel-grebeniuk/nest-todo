@@ -1,16 +1,17 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { Connection, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { CreateUserInput } from './dto/createUser.dto';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    private connection: Connection,
   ) {}
 
   async createUser(createUserInput: CreateUserInput): Promise<UserEntity> {

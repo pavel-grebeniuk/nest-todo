@@ -12,10 +12,10 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CategoryEntity } from '../../category/entities/category.entity';
-import { PublicFile } from '../../common/publicFile.entity';
+import { PublicFile } from '../../common/entities/publicFile.entity';
 
 @ObjectType('Todo')
-@Entity()
+@Entity('Todos')
 export class TodoEntity {
   @PrimaryGeneratedColumn()
   @Field((type) => ID)
@@ -47,9 +47,10 @@ export class TodoEntity {
 
   @Field((type) => [CategoryEntity])
   @ManyToMany((type) => CategoryEntity, (category) => category.todos, {
+    eager: true,
     cascade: true,
   })
-  @JoinTable()
+  @JoinTable({ name: 'Todos_categories' })
   category: CategoryEntity[];
 
   @Field((type) => [PublicFile])

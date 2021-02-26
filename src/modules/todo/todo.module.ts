@@ -11,8 +11,8 @@ import { CategoryModule } from '../category/category.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([TodoEntity]),
-    UserModule,
     forwardRef(() => CommonModule),
+    forwardRef(() => UserModule),
     CategoryModule,
   ],
   providers: [TodoResolver, TodoService],
