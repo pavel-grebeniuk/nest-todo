@@ -18,6 +18,7 @@ import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
 import { UserService } from '../user/user.service';
 import { CategoryService } from '../category/category.service';
 import { FilesService } from '../common/services/files.service';
+import { UserEntity } from '../user/entities/user.entity';
 
 @Injectable()
 export class TodoService {
@@ -155,14 +156,11 @@ export class TodoService {
     userId: number,
     status: TodoStatus,
   ): Promise<number> {
-    return this.connection
-      .createQueryBuilder()
-      .select('todo')
-      .from(TodoEntity, 'todo')
-      .where('todo.authorId=:userId AND todo.status=:status', {
-        userId,
+    return this.todoRepository.count({
+      where: {
         status,
-      })
-      .getCount();
+        author: userId,
+      },
+    });
   }
 }
