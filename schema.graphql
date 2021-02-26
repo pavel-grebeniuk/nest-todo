@@ -3,19 +3,39 @@
 # ------------------------------------------------------
 
 type User {
-  id: String!
+  id: ID!
   name: String!
   email: String!
   password: String!
+  todos: [Todo!]!
+}
+
+type CategoryEntity {
+  id: ID!
+  name: String!
+  todos: [Todo]!
+}
+
+type File {
+  url: String!
+  key: String!
 }
 
 type Todo {
-  id: String!
+  id: ID!
   title: String!
   description: String
-  completed: Boolean!
+  status: TodoStatus!
   expiredDate: String
   author: User!
+  category: [CategoryEntity!]!
+  images: [File!]!
+}
+
+enum TodoStatus {
+  NEW
+  COMPLETED
+  EXPIRED
 }
 
 type AuthTokenInterface {
@@ -24,14 +44,16 @@ type AuthTokenInterface {
 
 type Query {
   todos: [Todo!]!
-  todo(id: String!): Todo!
+  todo(id: Float!): Todo!
   me: User!
+  categories: [CategoryEntity!]!
 }
 
 type Mutation {
   createTodo(createTodoInput: CreateTodoInput!): Todo!
-  updateTodo(id: String!, updateTodoInput: UpdateTodoInput!): Todo!
-  removeTodo(id: String!): Todo!
+  updateTodo(id: Float!, updateTodoInput: UpdateTodoInput!): Todo!
+  removeTodo(id: Float!): Todo!
+  createCategory(name: String!): CategoryEntity!
   signIn(password: String!, email: String!): AuthTokenInterface!
   signUp(createUserInput: CreateUserInput!): AuthTokenInterface!
 }
@@ -39,16 +61,29 @@ type Mutation {
 input CreateTodoInput {
   title: String!
   description: String
+  expiredDate: String
+  categories: [String!]!
+  file: Upload
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 input UpdateTodoInput {
   title: String
   description: String
-  completed: Boolean
+  expiredDate: String
+  categories: [String!]
+  file: Upload
+  status: TodoStatus
 }
 
 input CreateUserInput {
   name: String!
   email: String!
   password: String!
+}
+
+type Subscription {
+  expiredTodos: [Todo!]!
 }

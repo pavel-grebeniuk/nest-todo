@@ -42,7 +42,11 @@ export class TodoResolver {
     createTodoInput: CreateTodoInput,
     @Context('user') { id: userId }: Partial<UserEntity>,
   ) {
-    return this.todoService.createTodo(createTodoInput, userId);
+    const todo = await this.todoService.createTodo(createTodoInput, userId);
+    if (!createTodoInput.file) {
+      return todo;
+    }
+    return this.todoService.saveImages(createTodoInput.file, todo.id);
   }
 
   @Mutation((returns) => TodoEntity)

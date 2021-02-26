@@ -16,6 +16,9 @@ import { PubSubService } from '../common/services/pubSub.service';
 import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
 import { UserService } from '../user/user.service';
 import { CategoryService } from '../category/category.service';
+import { FilesService } from '../common/services/files.service';
+import { Stream } from 'stream';
+import { FileUpload } from 'graphql-upload';
 
 @Injectable()
 export class TodoService {
@@ -25,6 +28,7 @@ export class TodoService {
     private pubSubService: PubSubService,
     private userService: UserService,
     private categoryService: CategoryService,
+    private filesService: FilesService,
   ) {}
 
   async getTodos(userId: number): Promise<TodoEntity[]> {
@@ -67,7 +71,6 @@ export class TodoService {
 
     const todoForDb = {
       ...createTodoInput,
-      status: TodoStatus.NEW,
       author: user,
       categories,
     };
@@ -93,6 +96,9 @@ export class TodoService {
 
   async removeTodo(id: number): Promise<TodoEntity> {
     const todo = await this.getTodoById(id);
+    for await (const { key } of todo.images) {
+      await this.filesService.deletePublicFile(key);
+    }
     await this.todoRepository.remove(todo);
     return { ...todo, id: +id };
   }
@@ -120,5 +126,18 @@ export class TodoService {
 
   async getExpiredTodos(): Promise<AsyncIterator<unknown>> {
     return this.pubSubService.subscribe(TODO_EXPIRED);
+  }
+
+  async saveImages(files: FileUpload[], todoId: number) {
+    const images = [];
+    for await (const file of files) {
+      const { createReadStream, filename } = file;
+      const stream = createReadStream();
+      const url = await this.filesService.uploadPublicFile(stream, filename);
+      images.push(url);
+    }
+    const todo = await this.getTodoById(todoId);
+    todo.images = [...todo.images, ...images];
+    return this.todoRepository.save(todo);
   }
 }

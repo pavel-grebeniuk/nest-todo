@@ -8,9 +8,11 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CategoryEntity } from '../../category/entities/category.entity';
+import { PublicFile } from '../../common/publicFile.entity';
 
 @ObjectType('Todo')
 @Entity()
@@ -28,7 +30,11 @@ export class TodoEntity {
   description?: string;
 
   @Field((type) => TodoStatus)
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: TodoStatus,
+    default: TodoStatus.NEW,
+  })
   status: TodoStatus;
 
   @Field({ nullable: true })
@@ -45,4 +51,11 @@ export class TodoEntity {
   })
   @JoinTable()
   category: CategoryEntity[];
+
+  @Field((type) => [PublicFile])
+  @OneToMany((type) => PublicFile, (publicFile) => publicFile.todo, {
+    eager: true,
+    nullable: true,
+  })
+  images?: PublicFile[];
 }

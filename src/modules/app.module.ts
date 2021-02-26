@@ -19,10 +19,10 @@ import { CategoryModule } from './category/category.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: +configService.get<string>('DB_PORT'),
-        username: configService.get<string>('DB_USER'),
-        password: configService.get<string>('DB_PASS'),
+        host: configService.get<string>('DB_HOST', 'localhost'),
+        port: +configService.get<string>('DB_PORT', '5432'),
+        username: configService.get<string>('DB_USER', 'postgres'),
+        password: configService.get<string>('DB_PASS', 'postgres'),
         database: 'postgres',
         autoLoadEntities: true,
         synchronize: true,
@@ -42,6 +42,7 @@ import { CategoryModule } from './category/category.module';
           headers: connection ? connection.context : req.headers,
         };
       },
+      cors: true,
     }),
     ScheduleModule.forRoot(),
     TodoModule,
