@@ -4,7 +4,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TodoEntity } from '../../todo/entities/todo.entity';
 
 @ObjectType('User')
-@Entity('Users')
+@Entity('users')
 export class UserEntity {
   @PrimaryGeneratedColumn()
   @Field((type) => ID)

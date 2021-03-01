@@ -3,32 +3,9 @@ version: '3.9'
 volumes:
   postgres_volume:
 services:
-  api:
-    build: .
-    command: yarn start:dev
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    environment:
-      DB_HOST: postgres_service
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASS: postgres
-      PORT: 3001
-      JWT_SECRET: secret
-      TOKEN_EXPIRED_IN: 1d
-      AWS_REGION: eu-central-1
-      AWS_ACCESS_KEY_ID: AKIAYQECUL6M62AMSU5T
-      AWS_SECRET_ACCESS_KEY: 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
-      AWS_PUBLIC_BUCKET_NAME: nest-todo
-    depends_on:
-      - postgres_service
-    volumes:
-      - ./src:/usr/src/app/src
-      - ./uploads:/usr/src/app/uploads
-  postgres_service:
+  postgres:
     image: postgres
-    restart: always
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:

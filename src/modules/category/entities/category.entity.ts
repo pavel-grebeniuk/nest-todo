@@ -4,7 +4,7 @@ import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TodoEntity } from '../../todo/entities/todo.entity';
 
 @ObjectType()
-@Entity('Categories')
+@Entity('categories')
 export class CategoryEntity {
   @PrimaryGeneratedColumn()
   @Field((type) => ID)

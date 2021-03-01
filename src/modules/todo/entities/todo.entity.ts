@@ -15,7 +15,7 @@ import { CategoryEntity } from '../../category/entities/category.entity';
 import { PublicFile } from '../../common/entities/publicFile.entity';
 
 @ObjectType('Todo')
-@Entity('Todos')
+@Entity('todos')
 export class TodoEntity {
   @PrimaryGeneratedColumn()
   @Field((type) => ID)
@@ -50,7 +50,7 @@ export class TodoEntity {
     eager: true,
     cascade: true,
   })
-  @JoinTable({ name: 'Todos_categories' })
+  @JoinTable({ name: 'todos_categories' })
   category: CategoryEntity[];
 
   @Field((type) => [PublicFile])

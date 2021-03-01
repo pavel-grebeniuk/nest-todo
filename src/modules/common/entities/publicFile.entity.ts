@@ -3,7 +3,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 
 import { TodoEntity } from '../../todo/entities/todo.entity';
 
-@Entity('PublicFiles')
+@Entity('publicFiles')
 @ObjectType('File')
 export class PublicFile {
   @PrimaryGeneratedColumn()

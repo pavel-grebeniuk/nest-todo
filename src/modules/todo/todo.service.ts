@@ -18,7 +18,6 @@ import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
 import { UserService } from '../user/user.service';
 import { CategoryService } from '../category/category.service';
 import { FilesService } from '../common/services/files.service';
-import { UserEntity } from '../user/entities/user.entity';
 
 @Injectable()
 export class TodoService {
@@ -29,7 +28,6 @@ export class TodoService {
     private userService: UserService,
     private categoryService: CategoryService,
     private filesService: FilesService,
-    private connection: Connection,
   ) {}
 
   async getTodos(userId: number): Promise<TodoEntity[]> {
