@@ -9,7 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
 import { CategoryModule } from './category/category.module';
-import { DatabaseModule } from './database/database.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import * as ormOptions from '../ormconfig';
 
 @Module({
   imports: [
@@ -45,7 +46,11 @@ import { DatabaseModule } from './database/database.module';
       },
       cors: true,
     }),
-    DatabaseModule,
+    TypeOrmModule.forRoot({
+      ...ormOptions,
+      migrationsRun: false,
+      migrations: [],
+    }),
     ScheduleModule.forRoot(),
     TodoModule,
     UserModule,

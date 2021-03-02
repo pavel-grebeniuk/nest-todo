@@ -19,8 +19,13 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db:up": "docker-compose up postgres",
-    "db:down": "docker-compose down"
+    "postgres:up": "docker-compose up postgres",
+    "postgres:down": "docker-compose down",
+    "db:sync": "yarn typeorm schema:sync",
+    "db:down": "yarn typeorm migration:revert",
+    "db:create": "yarn typeorm migration:create -n ",
+    "db:up": "yarn typeorm migration:run",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config src/ormconfig.ts"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -38,6 +43,7 @@
     "bcrypt": "^5.0.0",
     "class-transformer": "^0.3.2",
     "class-validator": "^0.13.1",
+    "dotenv": "^8.2.0",
     "graphql": "^15.5.0",
     "graphql-subscriptions": "^1.2.0",
     "graphql-tools": "^7.0.2",
