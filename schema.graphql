@@ -11,10 +11,11 @@ type User {
   completedTodosCount: Float!
 }
 
-type CategoryEntity {
+type Category {
   id: ID!
   name: String!
   todos: [Todo]!
+  newTodosCount: Float!
 }
 
 type File {
@@ -29,7 +30,7 @@ type Todo {
   status: TodoStatus!
   expiredDate: String
   author: User!
-  category: [CategoryEntity!]!
+  category: [Category!]!
   images: [File!]!
 }
 
@@ -47,14 +48,14 @@ type Query {
   todos: [Todo!]!
   todo(id: Float!): Todo!
   me: User!
-  categories: [CategoryEntity!]!
+  categories: [Category!]!
 }
 
 type Mutation {
   createTodo(createTodoInput: CreateTodoInput!): Todo!
   updateTodo(id: Float!, updateTodoInput: UpdateTodoInput!): Todo!
   removeTodo(id: Float!): Todo!
-  createCategory(name: String!): CategoryEntity!
+  createCategory(name: String!): Category!
   signIn(password: String!, email: String!): AuthTokenInterface!
   signUp(createUserInput: CreateUserInput!): AuthTokenInterface!
 }

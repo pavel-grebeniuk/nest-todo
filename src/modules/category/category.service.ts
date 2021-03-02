@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { TodoEntity } from '../todo/entities/todo.entity';
+import { TodoStatus } from '../todo/types/todoStatus.enum';
 
 @Injectable()
 export class CategoryService {
@@ -15,6 +16,16 @@ export class CategoryService {
     return this.categoryRepository.find({
       relations: ['todos'],
     });
+  }
+
+  async getCategoriesByTodoStatus(status: TodoStatus) {
+    return this.categoryRepository
+      .createQueryBuilder('cat')
+      .innerJoinAndSelect('cat.todos', 'todo')
+      .where('todo.status=:status', {
+        status,
+      })
+      .getMany();
   }
 
   async getCategoriesByName(categories: string[]): Promise<CategoryEntity[]> {

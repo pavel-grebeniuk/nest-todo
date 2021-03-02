@@ -3,7 +3,7 @@ import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { TodoEntity } from '../../todo/entities/todo.entity';
 
-@ObjectType()
+@ObjectType('Category')
 @Entity('categories')
 export class CategoryEntity {
   @PrimaryGeneratedColumn()
@@ -17,4 +17,7 @@ export class CategoryEntity {
   @Field((type) => [TodoEntity], { nullable: 'items' })
   @ManyToMany((type) => TodoEntity, (todo) => todo.category)
   todos: TodoEntity[];
+
+  @Field({ defaultValue: 0 })
+  newTodosCount: number;
 }
