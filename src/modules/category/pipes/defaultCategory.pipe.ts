@@ -8,7 +8,7 @@ export class DefaultCategoryPipe implements PipeTransform {
       return value;
     }
     value.categories = value.categories.map((category) =>
-      category === '' ? 'other' : category.toLowerCase().trim(),
+      category.toLowerCase().trim(),
     );
     return value;
   }

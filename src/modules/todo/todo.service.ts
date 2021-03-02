@@ -6,8 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
-import { Connection, LessThan, Repository } from 'typeorm';
-import { FileUpload } from 'graphql-upload';
+import { LessThan, Repository } from 'typeorm';
 
 import { CreateTodoInput } from './dto/createTodo.input';
 import { UpdateTodoInput } from './dto/updateTodo.input';
@@ -18,6 +17,7 @@ import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
 import { UserService } from '../user/user.service';
 import { CategoryService } from '../category/category.service';
 import { FilesService } from '../common/services/files.service';
+import { Upload } from '../common/entities/upload';
 
 @Injectable()
 export class TodoService {
@@ -97,7 +97,7 @@ export class TodoService {
       const categoriesList = await this.categoryService.getCategoriesByName(
         categories,
       );
-      todo.category = categoriesList;
+      todo.category.push(...categoriesList);
       await this.categoryService.assignTodo(todo, categoriesList);
     }
     return this.todoRepository.save(todo);
@@ -137,15 +137,17 @@ export class TodoService {
     return this.pubSubService.subscribe(TODO_EXPIRED);
   }
 
-  async saveImages(files: FileUpload[], todoId: number) {
+  async saveImages(files: Upload[], todoId: number) {
     const images = [];
+    const todo = await this.getTodoById(todoId);
+    if (!files || !files?.length) {
+      return todo;
+    }
     for await (const file of files) {
-      const { createReadStream, filename } = file;
-      const stream = createReadStream();
-      const url = await this.filesService.uploadPublicFile(stream, filename);
+      const { buffer, filename } = file;
+      const url = await this.filesService.uploadPublicFile(buffer, filename);
       images.push(url);
     }
-    const todo = await this.getTodoById(todoId);
     todo.images = [...todo.images, ...images];
     return this.todoRepository.save(todo);
   }

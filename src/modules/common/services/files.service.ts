@@ -5,7 +5,6 @@ import { PublicFile } from '../entities/publicFile.entity';
 import { S3 } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
-import { Stream } from 'stream';
 
 @Injectable()
 export class FilesService {
@@ -15,7 +14,7 @@ export class FilesService {
     private readonly configService: ConfigService,
   ) {}
 
-  async uploadPublicFile(data: Stream, filename: string) {
+  async uploadPublicFile(data: Buffer, filename: string) {
     const s3 = new S3();
     const uploadResult = await s3
       .upload({

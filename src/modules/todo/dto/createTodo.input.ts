@@ -2,23 +2,24 @@ import { Field, InputType } from '@nestjs/graphql';
 import {
   ArrayUnique,
   IsDateString,
+  IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { GraphQLUpload } from 'apollo-server-express';
-import { FileUpload } from 'graphql-upload';
 import { Exclude } from 'class-transformer';
+import { Upload } from '../../common/entities/upload';
 
 @InputType()
 export class CreateTodoInput {
   @IsString()
   @Field()
-  title: string;
+  readonly title: string;
 
   @IsString()
   @IsOptional()
   @Field({ nullable: true })
-  description?: string;
+  readonly description?: string;
 
   @IsOptional()
   @IsDateString()
@@ -27,11 +28,12 @@ export class CreateTodoInput {
 
   @ArrayUnique()
   @IsString({ each: true })
+  @IsNotEmpty({ each: true })
   @IsOptional()
   @Field((type) => [String])
-  categories: string[];
+  readonly categories: string[];
 
-  @Field((type) => GraphQLUpload, { nullable: true })
+  @Field(() => GraphQLUpload, { nullable: true })
   @Exclude()
-  file: FileUpload[];
+  readonly media: Upload[];
 }

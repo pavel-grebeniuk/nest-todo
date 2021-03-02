@@ -17,6 +17,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { DefaultCategoryPipe } from '../category/pipes/defaultCategory.pipe';
 import { UniqTodoNamePipe } from './pipes/uniqTodoName.pipe';
+import { TransformUploadPipe } from '../common/pipes/transform-upload.pipe';
 
 @UseGuards(AuthGuard)
 @Resolver((of) => TodoEntity)
@@ -38,20 +39,23 @@ export class TodoResolver {
 
   @Mutation((returns) => TodoEntity)
   async createTodo(
-    @Args('createTodoInput', DefaultCategoryPipe, UniqTodoNamePipe)
+    @Args(
+      'createTodoInput',
+      DefaultCategoryPipe,
+      UniqTodoNamePipe,
+      TransformUploadPipe,
+    )
     createTodoInput: CreateTodoInput,
     @Context('user') { id: userId }: Partial<UserEntity>,
   ) {
-    const todo = await this.todoService.createTodo(createTodoInput, userId);
-    if (!createTodoInput.file) {
-      return todo;
-    }
-    return this.todoService.saveImages(createTodoInput.file, todo.id);
+    const { id } = await this.todoService.createTodo(createTodoInput, userId);
+    return this.todoService.saveImages(createTodoInput.media, id);
   }
 
   @Mutation((returns) => TodoEntity)
   async updateTodo(
-    @Args('updateTodoInput') updateTodoInput: UpdateTodoInput,
+    @Args('updateTodoInput')
+    updateTodoInput: UpdateTodoInput,
     @Args('id') id: number,
   ) {
     return this.todoService.updateTodo(updateTodoInput, +id);
