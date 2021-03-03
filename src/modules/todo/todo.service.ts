@@ -18,6 +18,7 @@ import { UserService } from '../user/user.service';
 import { CategoryService } from '../category/category.service';
 import { FilesService } from '../common/services/files.service';
 import { Upload } from '../common/entities/upload';
+import { MediaService } from '../media/media.service';
 
 @Injectable()
 export class TodoService {
@@ -28,6 +29,7 @@ export class TodoService {
     private userService: UserService,
     private categoryService: CategoryService,
     private filesService: FilesService,
+    private mediaService: MediaService,
   ) {}
 
   async getTodos(userId: number): Promise<TodoEntity[]> {
@@ -105,8 +107,8 @@ export class TodoService {
 
   async removeTodo(id: number): Promise<TodoEntity> {
     const todo = await this.getTodoById(id);
-    for await (const { key } of todo.images) {
-      await this.filesService.deletePublicFile(key);
+    for await (const { id } of todo.images) {
+      await this.mediaService.delete(id);
     }
     await this.todoRepository.remove(todo);
     return { ...todo, id: +id };
@@ -144,9 +146,9 @@ export class TodoService {
       return todo;
     }
     for await (const file of files) {
-      const { buffer, filename } = file;
-      const url = await this.filesService.uploadPublicFile(buffer, filename);
-      images.push(url);
+      const url = await this.mediaService.create(file);
+      const image = await this.filesService.saveUploadResult({ Location: url });
+      images.push(image);
     }
     todo.images = [...todo.images, ...images];
     return this.todoRepository.save(todo);

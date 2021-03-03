@@ -14,7 +14,7 @@ export class CategoryEntity {
   @Column()
   name: string;
 
-  @Field((type) => [TodoEntity], { nullable: 'items' })
+  // @Field((type) => [TodoEntity], { nullable: 'items' })
   @ManyToMany((type) => TodoEntity, (todo) => todo.category)
   todos: TodoEntity[];
 

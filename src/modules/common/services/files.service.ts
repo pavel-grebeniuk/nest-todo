@@ -5,6 +5,8 @@ import { PublicFile } from '../entities/publicFile.entity';
 import { S3 } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
+import * as fs from 'fs';
+import { Upload } from '../entities/upload';
 
 @Injectable()
 export class FilesService {
@@ -26,9 +28,9 @@ export class FilesService {
     return this.saveUploadResult(uploadResult);
   }
 
-  async saveUploadResult(uploadResult: { Key: string; Location: string }) {
+  async saveUploadResult(uploadResult: { Key?: string; Location: string }) {
     const newFile = await this.publicFilesRepository.create({
-      key: uploadResult.Key,
+      key: uploadResult?.Key || '',
       url: uploadResult.Location,
     });
     return this.publicFilesRepository.save(newFile);
@@ -44,6 +46,28 @@ export class FilesService {
       .promise();
     await this.publicFilesRepository.delete({
       key,
+    });
+  }
+
+  async uploadFile(name: string, file: Upload): Promise<string> {
+    return new Promise((resolve, reject) => {
+      fs.writeFile(name, file.buffer, (err) => {
+        if (err) {
+          reject({ message: 'STORAGE_UPLOAD_ERROR' });
+        }
+        resolve(name);
+      });
+    });
+  }
+
+  async deleteFile(path: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      fs.unlink(path, (err) => {
+        if (err) {
+          reject({ message: 'STORAGE_DELETE_ERROR' });
+        }
+        resolve(path);
+      });
     });
   }
 }

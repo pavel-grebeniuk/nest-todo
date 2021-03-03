@@ -4,13 +4,15 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import * as Joi from '@hapi/joi';
 
+import * as ormOptions from '../ormconfig';
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
 import { CategoryModule } from './category/category.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as ormOptions from '../ormconfig';
+import { MediaModule } from './media/media.module';
+import { MediaController } from './media/media.controller';
 
 @Module({
   imports: [
@@ -57,6 +59,7 @@ import * as ormOptions from '../ormconfig';
     AuthModule,
     CommonModule,
     CategoryModule,
+    MediaModule,
   ],
 })
 export class AppModule {}

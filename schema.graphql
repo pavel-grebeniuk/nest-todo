@@ -14,7 +14,6 @@ type User {
 type Category {
   id: ID!
   name: String!
-  todos: [Todo]!
   newTodosCount: Float!
 }
 

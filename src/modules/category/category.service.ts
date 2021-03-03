@@ -4,6 +4,7 @@ import { CategoryEntity } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { TodoEntity } from '../todo/entities/todo.entity';
 import { TodoStatus } from '../todo/types/todoStatus.enum';
+import { log } from 'util';
 
 @Injectable()
 export class CategoryService {
@@ -13,37 +14,31 @@ export class CategoryService {
   ) {}
 
   async getCategories(): Promise<CategoryEntity[]> {
-    return this.categoryRepository.find({
-      relations: ['todos'],
-    });
-  }
-
-  async getCategoriesByTodoStatus(status: TodoStatus) {
-    return this.categoryRepository
+    const data = await this.categoryRepository
       .createQueryBuilder('cat')
-      .innerJoinAndSelect('cat.todos', 'todo')
-      .where('todo.status=:status', {
-        status,
+      .select('cat.*')
+      .leftJoin('cat.todos', 'todo', 'todo.status=:status', {
+        status: TodoStatus.NEW,
       })
-      .getMany();
+      .addSelect('COUNT(todo.id)', 'newTodosCount')
+      .groupBy('cat.id')
+      .getRawMany();
+    console.log(data);
+    return data;
   }
 
   async getCategoriesByName(categories: string[]): Promise<CategoryEntity[]> {
     const categoryList = [];
     for await (const cat of categories) {
-      try {
-        const categoryFromDb = await this.categoryRepository.findOne({
-          where: {
-            name: cat,
-          },
-          relations: ['todos'],
-        });
-        if (categoryFromDb) {
-          categoryList.push(categoryFromDb);
-          continue;
-        }
-      } catch (e) {
-        console.log(e);
+      const categoryFromDb = await this.categoryRepository.findOne({
+        where: {
+          name: cat,
+        },
+        relations: ['todos'],
+      });
+      if (categoryFromDb) {
+        categoryList.push(categoryFromDb);
+        continue;
       }
       const newCategory = await this.createCategory(cat);
       categoryList.push(newCategory);
