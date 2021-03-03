@@ -4,7 +4,6 @@ import { CategoryEntity } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { TodoEntity } from '../todo/entities/todo.entity';
 import { TodoStatus } from '../todo/types/todoStatus.enum';
-import { log } from 'util';
 
 @Injectable()
 export class CategoryService {

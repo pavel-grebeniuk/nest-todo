@@ -30,10 +30,8 @@ Installed <a href="https://www.docker.com" target="_blank">Docker</a>
 ## Running the app
 
 ```bash
-# yarn up
-$ start application
+# yarn postgres:up
+$ up db
 
-# yarn down
-$ stop application
 ```
 
