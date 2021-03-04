@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { TodoEntity } from '../todo/entities/todo.entity';
 import { TodoStatus } from '../todo/types/todoStatus.enum';
 
@@ -22,27 +22,23 @@ export class CategoryService {
       .addSelect('COUNT(todo.id)', 'newTodosCount')
       .groupBy('cat.id')
       .getRawMany();
-    console.log(data);
     return data;
   }
 
   async getCategoriesByName(categories: string[]): Promise<CategoryEntity[]> {
-    const categoryList = [];
-    for await (const cat of categories) {
-      const categoryFromDb = await this.categoryRepository.findOne({
-        where: {
-          name: cat,
-        },
-        relations: ['todos'],
-      });
-      if (categoryFromDb) {
-        categoryList.push(categoryFromDb);
-        continue;
-      }
-      const newCategory = await this.createCategory(cat);
-      categoryList.push(newCategory);
-    }
-    return categoryList;
+    const catList = await this.categoryRepository.find({
+      where: {
+        name: In(categories),
+      },
+      relations: ['todos'],
+    });
+    const newCategories = categories.filter(
+      (cat) => !catList.some((category) => category.name === cat),
+    );
+    const createdCategories = await Promise.all(
+      newCategories.map((cat) => this.createCategory(cat)),
+    );
+    return [...catList, ...createdCategories];
   }
 
   async createCategory(name: string): Promise<CategoryEntity> {

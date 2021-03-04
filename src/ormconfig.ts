@@ -12,7 +12,7 @@ const connection: ConnectionOptions = {
   password: DB_PASS,
   type: 'postgres',
   name: 'default',
-  synchronize: false,
+  synchronize: true,
   migrationsRun: true,
   migrationsTableName: 'migrations_typeorm',
   entities: ['**/*.entity{ .ts,.js}'],

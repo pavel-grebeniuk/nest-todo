@@ -12,7 +12,6 @@ import { CommonModule } from './common/common.module';
 import { CategoryModule } from './category/category.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MediaModule } from './media/media.module';
-import { MediaController } from './media/media.controller';
 
 @Module({
   imports: [

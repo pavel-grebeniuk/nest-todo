@@ -63,9 +63,6 @@ export class TodoService {
     userId: number,
   ): Promise<TodoEntity> {
     const user = await this.userService.getUserById(userId);
-    if (!user) {
-      throw new ForbiddenException('User not authorized');
-    }
     const categories = await this.categoryService.getCategoriesByName(
       createTodoInput.categories,
     );
