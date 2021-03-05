@@ -2,19 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type User {
+type UserEntity {
   id: ID!
   name: String!
   email: String!
   todos: [Todo!]!
-  expiredTodosCount: Float!
-  completedTodosCount: Float!
 }
 
 type Category {
   id: ID!
-  name: String!
+  name: String
+  todos: [Todo]!
   newTodosCount: Float!
+  expiredTodosCount: Float!
 }
 
 type File {
@@ -28,7 +28,7 @@ type Todo {
   description: String
   status: TodoStatus!
   expiredDate: String
-  author: User!
+  author: UserEntity!
   category: [Category!]!
   images: [File!]!
 }
@@ -39,24 +39,28 @@ enum TodoStatus {
   EXPIRED
 }
 
-type AuthTokenInterface {
-  access_token: String!
+type UserQuery {
+  """Get current user"""
+  getUserInfo: UserEntity!
 }
 
-type Query {
+type TodoQuery {
+  """Get todos list"""
   todos: [Todo!]!
-  todo(id: Float!): Todo!
-  me: User!
-  categories: [Category!]!
+
+  """Get todo by id"""
+  todoById(id: Float!): Todo!
 }
 
-type Mutation {
-  createTodo(createTodoInput: CreateTodoInput!): Todo!
-  updateTodo(id: Float!, updateTodoInput: UpdateTodoInput!): Todo!
+type TodoMutation {
+  """Create todo"""
+  createTodo(input: CreateTodoInput!): Todo!
+
+  """Update todo"""
+  updateTodo(id: Float!, input: UpdateTodoInput!): Todo!
+
+  """Remove todo"""
   removeTodo(id: Float!): Todo!
-  createCategory(name: String!): Category!
-  signIn(password: String!, email: String!): AuthTokenInterface!
-  signUp(createUserInput: CreateUserInput!): AuthTokenInterface!
 }
 
 input CreateTodoInput {
@@ -79,12 +83,63 @@ input UpdateTodoInput {
   status: TodoStatus
 }
 
-input CreateUserInput {
-  name: String!
+type TodoSubscription {
+  expiredTodos: [Todo!]!
+}
+
+type AuthMutation {
+  """Sign in with password and email"""
+  signIn(input: SignInInput!): String!
+
+  """Sign up"""
+  signUp(input: SignUpInput!): String!
+}
+
+input SignInInput {
   email: String!
   password: String!
 }
 
+input SignUpInput {
+  email: String!
+  password: String!
+  name: String!
+}
+
+type CategoryMutation {
+  """Create category"""
+  createCategory(name: String!): Category!
+
+  """Update category"""
+  updateCategory: Category!
+}
+
+type CategoryQuery {
+  """Get categories list"""
+  categories: Category!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  todos: [Todo!]!
+  expiredTodosCount: Float!
+  completedTodosCount: Float!
+}
+
+type Query {
+  category: CategoryQuery!
+  todo: TodoQuery!
+  user: UserQuery!
+}
+
+type Mutation {
+  auth: AuthMutation!
+  category: CategoryMutation!
+  todo: TodoMutation!
+}
+
 type Subscription {
-  expiredTodos: [Todo!]!
+  todo: TodoSubscription!
 }

@@ -1,13 +1,13 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { TodoEntity } from '../../todo/entities/todo.entity';
+import { TodoEntity } from '../../todo/models/todo.entity';
 
-@ObjectType('User')
+@ObjectType()
 @Entity('users')
 export class UserEntity {
   @PrimaryGeneratedColumn()
-  @Field((type) => ID)
+  @Field(() => ID)
   id: number;
 
   @Column()
@@ -21,13 +21,7 @@ export class UserEntity {
   @Column()
   password: string;
 
-  @Field((type) => [TodoEntity])
-  @OneToMany((type) => TodoEntity, (todo) => todo.author)
+  @Field(() => [TodoEntity])
+  @OneToMany(() => TodoEntity, (todo) => todo.author)
   todos: TodoEntity[];
-
-  @Field()
-  expiredTodosCount: number;
-
-  @Field()
-  completedTodosCount: number;
 }

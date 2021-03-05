@@ -7,9 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 import { UserService } from '../user/user.service';
-import { CreateUserInput } from '../user/dto/createUser.dto';
-import { UserEntity } from '../user/entities/user.entity';
-import { AuthTokenInterface } from './interfaces/authToken.interface';
+import { UserEntity } from '../user/models/user.entity';
+import { SignUpInput } from './dto/sign-up.dto';
+import { SignInInput } from './dto/sign-in.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,16 +18,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(
-    userEmail: string,
-    password: string,
-  ): Promise<AuthTokenInterface> {
-    const user = await this.validateUser(userEmail, password);
+  async signIn({ email, password }: SignInInput): Promise<string> {
+    const user = await this.validateUser(email, password);
     const token = await this.generateToken(user);
     return token;
   }
 
-  async signUp(createUserInput: CreateUserInput): Promise<AuthTokenInterface> {
+  async signUp(createUserInput: SignUpInput): Promise<string> {
     const user = await this.userService.createUser(createUserInput);
     if (!user) {
       throw new UnauthorizedException();
@@ -36,6 +33,7 @@ export class AuthService {
     return token;
   }
 
+  //todo add custom validator class
   private async validateUser(email: string, password: string) {
     const user = await this.userService.findUser(email);
     if (!user) {
@@ -55,8 +53,6 @@ export class AuthService {
 
   private async generateToken(user: Partial<UserEntity>) {
     const { email, id } = user;
-    return {
-      access_token: this.jwtService.sign({ email, id }),
-    };
+    return this.jwtService.sign({ email, id });
   }
 }

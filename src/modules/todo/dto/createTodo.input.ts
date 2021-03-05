@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { GraphQLUpload } from 'apollo-server-express';
 import { Exclude } from 'class-transformer';
-import { Upload } from '../../common/entities/upload';
+import { Upload } from '../../shared/entities/upload';
 
 @InputType()
 export class CreateTodoInput {

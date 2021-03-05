@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Field, ObjectType } from '@nestjs/graphql';
 
-import { TodoEntity } from '../../todo/entities/todo.entity';
+import { TodoEntity } from '../../todo/models/todo.entity';
 
 @Entity('publicFiles')
 @ObjectType('File')
@@ -20,3 +20,4 @@ export class PublicFile {
   @ManyToOne((type) => TodoEntity, (todo) => todo.images)
   public todo: TodoEntity;
 }
+// todo move to module

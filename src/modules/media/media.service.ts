@@ -4,11 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as fs from 'fs';
-import { Upload } from '../common/entities/upload';
-import { FilesService } from '../common/services/files.service';
+import { Upload } from '../shared/entities/upload';
+import { FilesService } from '../shared/services/files.service';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PublicFile } from '../common/entities/publicFile.entity';
+import { PublicFile } from '../shared/entities/publicFile.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

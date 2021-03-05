@@ -1,6 +1,6 @@
 import {
   BadRequestException,
-  ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,21 +11,22 @@ import { LessThan, Repository } from 'typeorm';
 import { CreateTodoInput } from './dto/createTodo.input';
 import { UpdateTodoInput } from './dto/updateTodo.input';
 import { TodoStatus } from './types/todoStatus.enum';
-import { TodoEntity } from './entities/todo.entity';
-import { PubSubService } from '../common/services/pubSub.service';
-import { TODO_EXPIRED } from '../common/constants/subscriptionTriggers';
+import { TodoEntity } from './models/todo.entity';
 import { UserService } from '../user/user.service';
 import { CategoryService } from '../category/category.service';
-import { FilesService } from '../common/services/files.service';
-import { Upload } from '../common/entities/upload';
+import { FilesService } from '../shared/services/files.service';
+import { Upload } from '../shared/entities/upload';
 import { MediaService } from '../media/media.service';
+import { PubSub } from 'graphql-subscriptions';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { GqlSubscriptionsEnum } from '../shared/constants/gql-subscriptions.enum';
 
 @Injectable()
 export class TodoService {
   constructor(
+    @Inject('PUB_SUB') private readonly pubSub: PubSub,
     @InjectRepository(TodoEntity)
     private todoRepository: Repository<TodoEntity>,
-    private pubSubService: PubSubService,
     private userService: UserService,
     private categoryService: CategoryService,
     private filesService: FilesService,
@@ -111,6 +112,7 @@ export class TodoService {
     return { ...todo, id: +id };
   }
 
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async updateExpiredTodos(): Promise<void> {
     const todos = await this.todoRepository.find({
       where: {
@@ -123,7 +125,7 @@ export class TodoService {
       todos.forEach((todo) => (todo.status = TodoStatus.EXPIRED));
       try {
         await this.todoRepository.save(todos);
-        this.pubSubService.publish(TODO_EXPIRED, {
+        this.pubSub.publish(GqlSubscriptionsEnum.TODO_EXPIRED, {
           expiredTodos: todos,
         });
       } catch (e) {
@@ -133,7 +135,7 @@ export class TodoService {
   }
 
   async getExpiredTodos(): Promise<AsyncIterator<unknown>> {
-    return this.pubSubService.subscribe(TODO_EXPIRED);
+    return this.pubSub.asyncIterator(GqlSubscriptionsEnum.TODO_EXPIRED);
   }
 
   async saveImages(files: Upload[], todoId: number) {

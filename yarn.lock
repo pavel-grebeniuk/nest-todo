@@ -1223,7 +1223,7 @@
 
 "@nestjs/common@^7.5.1":
   version "7.6.10"
-  resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-7.6.10.tgz#097ff13ea4ee46483ac67b75d7ff664e4a93049d"
+  resolved "https://registry.yarnpkg.com/@nestjs/shared/-/common-7.6.10.tgz#097ff13ea4ee46483ac67b75d7ff664e4a93049d"
   integrity sha512-2r7diLaEaoGZV/nna+IdTHmcI9FOoSOUGrcH9byzeHzekoR8s9D1XiYXzYQYNa3iVyheO87XwGdjklW9sYP+aw==
   dependencies:
     axios "0.21.1"
@@ -1461,7 +1461,7 @@
 
 "@ts-morph/common@~0.7.0":
   version "0.7.3"
-  resolved "https://registry.yarnpkg.com/@ts-morph/common/-/common-0.7.3.tgz#380020c278e4aa6cecedf362a1157591d1003267"
+  resolved "https://registry.yarnpkg.com/@ts-morph/shared/-/common-0.7.3.tgz#380020c278e4aa6cecedf362a1157591d1003267"
   integrity sha512-M6Tcu0EZDLL8Ht7WAYz7yJfDZ9eArhqR8XZ9Mk3q8jwU6MKFAttrw3JtW4JhneqTz7pZMv4XaimEdXI0E4K4rg==
   dependencies:
     "@dsherret/to-absolute-glob" "^2.0.2"

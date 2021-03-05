@@ -11,8 +11,8 @@ import { Upload } from '../entities/upload';
 @Injectable()
 export class FilesService {
   constructor(
-    @InjectRepository(PublicFile)
-    private publicFilesRepository: Repository<PublicFile>,
+    // @InjectRepository(PublicFile)
+    // private publicFilesRepository: Repository<PublicFile>,
     private readonly configService: ConfigService,
   ) {}
 
@@ -29,25 +29,25 @@ export class FilesService {
   }
 
   async saveUploadResult(uploadResult: { Key?: string; Location: string }) {
-    const newFile = await this.publicFilesRepository.create({
-      key: uploadResult?.Key || '',
-      url: uploadResult.Location,
-    });
-    return this.publicFilesRepository.save(newFile);
+    // const newFile = await this.publicFilesRepository.create({
+    //   key: uploadResult?.Key || '',
+    //   url: uploadResult.Location,
+    // });
+    // return this.publicFilesRepository.save(newFile);
   }
 
-  async deletePublicFile(key: string) {
-    const s3 = new S3();
-    await s3
-      .deleteObject({
-        Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME'),
-        Key: key,
-      })
-      .promise();
-    await this.publicFilesRepository.delete({
-      key,
-    });
-  }
+  // async deletePublicFile(key: string) {
+  //   const s3 = new S3();
+  //   await s3
+  //     .deleteObject({
+  //       Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME'),
+  //       Key: key,
+  //     })
+  //     .promise();
+  //   await this.publicFilesRepository.delete({
+  //     key,
+  //   });
+  // }
 
   async uploadFile(name: string, file: Upload): Promise<string> {
     return new Promise((resolve, reject) => {

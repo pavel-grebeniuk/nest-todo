@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
-import { UserEntity } from '../../user/entities/user.entity';
+import { UserEntity } from '../../user/models/user.entity';
 import { TodoStatus } from '../types/todoStatus.enum';
 import {
   Column,
@@ -11,14 +11,14 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { CategoryEntity } from '../../category/entities/category.entity';
-import { PublicFile } from '../../common/entities/publicFile.entity';
+import { CategoryEntity } from '../../category/models/category.entity';
+import { PublicFile } from '../../shared/entities/publicFile.entity';
 
 @ObjectType('Todo')
 @Entity('todos')
 export class TodoEntity {
   @PrimaryGeneratedColumn()
-  @Field((type) => ID)
+  @Field(() => ID)
   id: number;
 
   @Field()
@@ -29,7 +29,7 @@ export class TodoEntity {
   @Column({ nullable: true })
   description?: string;
 
-  @Field((type) => TodoStatus)
+  @Field(() => TodoStatus)
   @Column({
     type: 'enum',
     enum: TodoStatus,
@@ -41,20 +41,20 @@ export class TodoEntity {
   @Column()
   expiredDate?: string;
 
-  @Field((type) => UserEntity)
-  @ManyToOne((type) => UserEntity, (user) => user.todos)
+  @Field(() => UserEntity)
+  @ManyToOne(() => UserEntity, (user) => user.todos)
   author?: UserEntity;
 
-  @Field((type) => [CategoryEntity])
-  @ManyToMany((type) => CategoryEntity, (category) => category.todos, {
+  @Field(() => [CategoryEntity])
+  @ManyToMany(() => CategoryEntity, (category) => category.todos, {
     eager: true,
     cascade: true,
   })
   @JoinTable({ name: 'todos_categories' })
   category: CategoryEntity[];
 
-  @Field((type) => [PublicFile])
-  @OneToMany((type) => PublicFile, (publicFile) => publicFile.todo, {
+  @Field(() => [PublicFile])
+  @OneToMany(() => PublicFile, (publicFile) => publicFile.todo, {
     eager: true,
     nullable: true,
   })

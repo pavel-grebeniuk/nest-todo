@@ -1,20 +1,19 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Connection, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-import { CreateUserInput } from './dto/createUser.dto';
-import { UserEntity } from './entities/user.entity';
+import { UserEntity } from './models/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { SignUpInput } from '../auth/dto/sign-up.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
-    private connection: Connection,
   ) {}
 
-  async createUser(createUserInput: CreateUserInput): Promise<UserEntity> {
+  async createUser(createUserInput: SignUpInput): Promise<UserEntity> {
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(createUserInput.password, salt);

@@ -7,7 +7,7 @@ import {
 import { GqlExecutionContext } from '@nestjs/graphql';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
-
+//todo move to shared
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private configService: ConfigService) {}

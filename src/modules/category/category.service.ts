@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CategoryEntity } from './entities/category.entity';
+import { CategoryEntity } from './models/category.entity';
 import { In, Repository } from 'typeorm';
-import { TodoEntity } from '../todo/entities/todo.entity';
+import { TodoEntity } from '../todo/models/todo.entity';
 import { TodoStatus } from '../todo/types/todoStatus.enum';
 
 @Injectable()
@@ -13,40 +13,52 @@ export class CategoryService {
   ) {}
 
   async getCategories(): Promise<CategoryEntity[]> {
-    const data = await this.categoryRepository
+    return await this.categoryRepository
       .createQueryBuilder('cat')
       .select('cat.*')
-      .leftJoin('cat.todos', 'todo', 'todo.status=:status', {
-        status: TodoStatus.NEW,
-      })
-      .addSelect('COUNT(todo.id)', 'newTodosCount')
+      .leftJoin(
+        'cat.todos',
+        'todo',
+        'todo.status IN (:newStatus, :expiredStatus)',
+      )
+      .addSelect(
+        'COUNT(todo.id) filter (where todo.status = :newStatus)',
+        'newTodosCount',
+      )
+      .addSelect(
+        'COUNT(todo.id) filter (where todo.status = :expiredStatus)',
+        'expiredTodosCount',
+      )
+      .setParameter('newStatus', TodoStatus.NEW)
+      .setParameter('expiredStatus', TodoStatus.EXPIRED)
       .groupBy('cat.id')
       .getRawMany();
-    return data;
   }
 
   async getCategoriesByName(categories: string[]): Promise<CategoryEntity[]> {
-    const catList = await this.categoryRepository.find({
+    const existingCategories = await this.categoryRepository.find({
       where: {
         name: In(categories),
       },
       relations: ['todos'],
     });
-    const newCategories = categories.filter(
-      (cat) => !catList.some((category) => category.name === cat),
-    );
-    const createdCategories = await Promise.all(
-      newCategories.map((cat) => this.createCategory(cat)),
-    );
-    return [...catList, ...createdCategories];
+    const categoriesList = categories
+      .filter(
+        (cat) => !existingCategories.some((category) => category.name === cat),
+      )
+      .map((name) => ({
+        name,
+        todos: [],
+      }));
+    const newCategories = await this.categoryRepository.save(categoriesList);
+    return [...existingCategories, ...newCategories];
   }
 
   async createCategory(name: string): Promise<CategoryEntity> {
-    const category = await this.categoryRepository.create({
+    return this.categoryRepository.create({
       name,
       todos: [],
     });
-    return this.categoryRepository.save(category);
   }
 
   async assignTodo(
