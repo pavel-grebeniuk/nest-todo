@@ -54,25 +54,21 @@ export class TodoService extends BasicService<TodoEntity> {
   }
 
   async createTodo(
-    createTodoInput: CreateTodoInput,
+    input: CreateTodoInput,
     user: UserEntity,
   ): Promise<TodoEntity> {
-    const categories = await this.categoryService.getCategoriesByName(
-      createTodoInput.categories,
-    );
-    const todoForDb = {
-      ...createTodoInput,
+    const { categories, media, ...entityData } = input;
+    const todo = await this.todoRepository.merge(new TodoEntity(), {
+      ...entityData,
       author: user,
+    });
+    const categoryList = await this.categoryService.getCategoriesByName(
       categories,
-    };
-    if (!createTodoInput.expiredDate) {
-      todoForDb.expiredDate = moment().add(1, 'h').toISOString();
-    }
-    const createdTodo = await this.todoRepository.create(todoForDb);
-    const newTodo = await this.todoRepository.save(createdTodo);
-    await this.categoryService.assignTodo(newTodo, categories);
-    console.log(newTodo);
-    return newTodo;
+    );
+    const images = await this.saveImages(media);
+    todo.category = categoryList;
+    todo.images = images;
+    return this.todoRepository.save(todo);
   }
 
   async updateTodo(
@@ -84,26 +80,21 @@ export class TodoService extends BasicService<TodoEntity> {
       id,
       ...inputData,
     });
-    if (!todo) {
-      throw new NotFoundException(`Todo ${id} not found`);
-    }
-    if (categories?.length) {
+    if (categories) {
       const categoriesList = await this.categoryService.getCategoriesByName(
         categories,
       );
-      todo.category.push(...categoriesList);
-      await this.categoryService.assignTodo(todo, categoriesList);
+      todo.category = categoriesList;
     }
     return this.todoRepository.save(todo);
   }
 
-  async removeTodo(id: number): Promise<TodoEntity> {
-    const todo = await this.getTodoById(id, 1);
-    for await (const { id } of todo.images) {
-      await this.mediaService.delete(id);
-    }
+  async removeTodo(id: number, userId: number): Promise<TodoEntity> {
+    const todo = await this.getTodoById(id, userId);
+    if (!todo) throw new NotFoundException();
+    await this.mediaService.delete(todo.images);
     await this.todoRepository.remove(todo);
-    return { ...todo, id: +id };
+    return { ...todo, id };
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
@@ -132,18 +123,12 @@ export class TodoService extends BasicService<TodoEntity> {
     return this.pubSub.asyncIterator(GqlSubscriptionsEnum.TODO_EXPIRED);
   }
 
-  async saveImages(files: Upload[], todoId: number) {
+  async saveImages(files: Upload[]) {
     const images = [];
-    const todo = await this.getTodoById(todoId);
-    if (!files || !files?.length) {
-      return todo;
-    }
     for await (const file of files) {
       const url = await this.mediaService.create(file);
-      // const image = await this.filesService.saveUploadResult({ Location: url });
-      // images.push(image);
+      images.push(url);
     }
-    todo.images = [...todo.images, ...images];
-    return this.todoRepository.save(todo);
+    return images;
   }
 }

@@ -16,6 +16,7 @@ export class Media extends BasicEntity {
   url: string;
 
   @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
   fileName: string;
 
   @Field(() => String, { nullable: true })
@@ -26,6 +27,8 @@ export class Media extends BasicEntity {
   @Column()
   size?: number;
 
-  @ManyToOne(() => TodoEntity, (todo) => todo.images)
+  @ManyToOne(() => TodoEntity, (todo) => todo.images, {
+    onDelete: 'CASCADE',
+  })
   todo?: TodoEntity;
 }

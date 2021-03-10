@@ -3,8 +3,8 @@ import { CategoryEntity } from './category.entity';
 
 @ObjectType()
 export class CategoryQuery {
-  @Field(() => CategoryEntity, {
+  @Field(() => [CategoryEntity], {
     description: 'Get categories list',
   })
-  readonly categories: CategoryEntity;
+  readonly categories: CategoryEntity[];
 }

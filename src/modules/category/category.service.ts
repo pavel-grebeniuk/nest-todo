@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './models/category.entity';
 import { In, Repository } from 'typeorm';
-import { TodoEntity } from '../todo/models/todo.entity';
 import { TodoStatus } from '../todo/types/todoStatus.enum';
 
 @Injectable()
@@ -52,20 +51,5 @@ export class CategoryService {
       }));
     const newCategories = await this.categoryRepository.save(categoriesList);
     return [...existingCategories, ...newCategories];
-  }
-
-  async createCategory(name: string): Promise<CategoryEntity> {
-    return this.categoryRepository.create({
-      name,
-      todos: [],
-    });
-  }
-
-  async assignTodo(
-    todo: TodoEntity,
-    categories: CategoryEntity[],
-  ): Promise<void> {
-    categories.forEach((cat) => cat.todos.push(todo));
-    await this.categoryRepository.save(categories);
   }
 }

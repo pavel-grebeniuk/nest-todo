@@ -33,14 +33,14 @@ export class CreateTodoInput {
   @Field({ nullable: true })
   expiredDate: string;
 
+  @IsOptional()
   @ArrayUnique()
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
-  @IsOptional()
-  @Field(() => [String])
-  readonly categories: string[];
+  @Field(() => [String], { nullable: true, defaultValue: ['other'] })
+  readonly categories?: string[];
 
-  @Field(() => GraphQLUpload, { nullable: true })
+  @Field(() => [GraphQLUpload], { nullable: true, defaultValue: [] })
   @IsOptional()
   readonly media: Upload[];
 }

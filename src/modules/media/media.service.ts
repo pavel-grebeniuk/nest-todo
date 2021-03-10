@@ -29,41 +29,18 @@ export class MediaService {
       throw new BadRequestException(err.message);
     });
     return this.repository.save(
-      this.repository.create({ url, mimetype: file.mimetype, size }),
+      this.repository.create({
+        url,
+        mimetype: file.mimetype,
+        size,
+        fileName: name,
+      }),
     );
   }
 
-  //
-  // async create1(file: Upload) {
-  //   const path = 'uploads/images';
-  //   await fs.mkdirSync(path, {
-  //     recursive: true,
-  //   });
-  //
-  //   const name = file.filename;
-  //   const url = `${path}/${name}`;
-  //   await this.filesService.uploadFile(url, file).catch((err) => {
-  //     throw new BadRequestException(err.message);
-  //   });
-  //   return `${this.configService.get('SERVER_URL')}/files/${url}`;
-  // }
-
-  async delete(mediaId: number) {
-    const media = await this.repository.findOne(mediaId);
-    if (!media) {
-      throw new BadRequestException('MEDIA_DOES_NOT_EXIST');
+  async delete(images: Media[]) {
+    for await (const { url } of images) {
+      await this.storageService.deleteFile(url);
     }
-    await this.storageService.deleteFile(media.url);
-    return this.repository.delete(mediaId);
   }
-
-  // async delete(id: number) {
-  //   const media = await this.publicFileRepository.findOne(id);
-  //   if (!media) {
-  //     throw new NotFoundException();
-  //   }
-  //   const url = media.url.split('files/')[1];
-  //   await this.filesService.deleteFile(url);
-  //   await this.publicFileRepository.delete(id);
-  // }
 }

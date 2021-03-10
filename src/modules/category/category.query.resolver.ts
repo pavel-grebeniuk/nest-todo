@@ -1,7 +1,6 @@
 import { Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { CategoryQuery } from './models/category.query.model';
 import { CategoryService } from './category.service';
-import { CategoryEntity } from './models/category.entity';
 
 @Resolver(() => CategoryQuery)
 export class CategoryQueryResolver {
@@ -12,7 +11,7 @@ export class CategoryQueryResolver {
   }
 
   @ResolveField()
-  async categories(): Promise<CategoryEntity[]> {
+  async categories() {
     return this.categoryService.getCategories();
   }
 }

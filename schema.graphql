@@ -32,7 +32,7 @@ type Todo {
   title: String!
   description: String
   status: TodoStatus!
-  expiredDate: String
+  expiredDate: String!
   author: UserEntity!
   category: [Category!]!
   images: [Media!]!
@@ -66,18 +66,18 @@ type TodoMutation {
   createTodo(input: CreateTodoInput!): Todo!
 
   """Update todo"""
-  updateTodo(id: Float!, input: UpdateTodoInput!): Todo!
+  updateTodo(args: TodoIdInput!, input: UpdateTodoInput!): Todo!
 
   """Remove todo"""
-  removeTodo(id: Float!): Todo!
+  removeTodo(args: TodoIdInput!): Todo!
 }
 
 input CreateTodoInput {
   title: String!
   description: String
   expiredDate: String
-  categories: [String!]!
-  media: Upload
+  categories: [String!] = ["other"]
+  media: [Upload!] = []
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -87,8 +87,8 @@ input UpdateTodoInput {
   title: String
   description: String
   expiredDate: String
-  categories: [String!]
-  media: Upload
+  categories: [String!] = ["other"]
+  media: [Upload!] = []
   status: TodoStatus
 }
 
@@ -115,17 +115,9 @@ input SignUpInput {
   name: String!
 }
 
-type CategoryMutation {
-  """Create category"""
-  createCategory(name: String!): Category!
-
-  """Update category"""
-  updateCategory: Category!
-}
-
 type CategoryQuery {
   """Get categories list"""
-  categories: Category!
+  categories: [Category!]!
 }
 
 type User {
@@ -150,7 +142,6 @@ type Query {
 
 type Mutation {
   auth: AuthMutation!
-  category: CategoryMutation!
   todo: TodoMutation!
 }
 

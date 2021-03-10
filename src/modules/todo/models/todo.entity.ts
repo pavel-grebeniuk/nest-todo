@@ -1,7 +1,4 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-
-import { UserEntity } from '../../user/models/user.entity';
-import { TodoStatus } from '../types/todoStatus.enum';
 import {
   Column,
   Entity,
@@ -10,6 +7,9 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
+
+import { UserEntity } from '../../user/models/user.entity';
+import { TodoStatus } from '../types/todoStatus.enum';
 import { CategoryEntity } from '../../category/models/category.entity';
 import { BasicEntity } from '../../shared/entities/basic.entity';
 import { Media } from '../../media/models/media.entity';
@@ -36,8 +36,8 @@ export class TodoEntity extends BasicEntity {
   })
   status: TodoStatus;
 
-  @Field({ nullable: true })
-  @Column()
+  @Field()
+  @Column({ default: () => `CURRENT_TIMESTAMP + interval '1 day'` })
   expiredDate?: string;
 
   @Field(() => UserEntity)
