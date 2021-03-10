@@ -3,7 +3,7 @@ import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { isObject as _isObject } from 'lodash';
 import { WritableStreamBuffer } from 'stream-buffers';
-import { Upload } from '../entities/upload';
+import { Upload } from '../classes/upload';
 
 async function transformUploadFile(valueOrPromise) {
   const file = await Promise.resolve(valueOrPromise);

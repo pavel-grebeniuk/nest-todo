@@ -5,15 +5,22 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Validate,
 } from 'class-validator';
 import { GraphQLUpload } from 'apollo-server-express';
-import { Exclude } from 'class-transformer';
-import { Upload } from '../../shared/entities/upload';
+import { Upload } from '../../shared/classes/upload';
+import { ShouldExistValidator } from '../../shared/validators/should-exist.validator';
+import { TodoService } from '../todo.service';
 
 @InputType()
 export class CreateTodoInput {
   @IsString()
   @Field()
+  @Validate(
+    ShouldExistValidator,
+    [{ service: TodoService, prop: 'title', reverse: true }],
+    { message: `Todo already exists` },
+  )
   readonly title: string;
 
   @IsString()
@@ -30,10 +37,10 @@ export class CreateTodoInput {
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
   @IsOptional()
-  @Field((type) => [String])
+  @Field(() => [String])
   readonly categories: string[];
 
   @Field(() => GraphQLUpload, { nullable: true })
-  @Exclude()
+  @IsOptional()
   readonly media: Upload[];
 }

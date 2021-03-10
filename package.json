@@ -19,8 +19,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "postgres:up": "docker-compose up postgres",
-    "postgres:down": "docker-compose down",
+    "pg:up": "docker-compose up postgres",
+    "pg:down": "docker-compose down",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config src/ormconfig.ts",
     "db:down": "yarn typeorm migration:revert",
     "db:create": "yarn typeorm migration:create -n ",
@@ -28,6 +28,8 @@
     "db:sync": "yarn typeorm schema:sync"
   },
   "dependencies": {
+    "@2muchcoffee/nestjs-context": "^0.2.0",
+    "@2muchcoffee/nestjs-gql-context": "^0.2.0",
     "@hapi/joi": "^17.1.1",
     "@nestjs/common": "^7.5.1",
     "@nestjs/config": "^0.6.3",

@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { MediaController } from './media.controller';
 import { MediaService } from './media.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PublicFile } from '../shared/entities/publicFile.entity';
+import { Media } from './models/media.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PublicFile])],
+  imports: [TypeOrmModule.forFeature([Media])],
   controllers: [MediaController],
   providers: [MediaService],
   exports: [MediaService],

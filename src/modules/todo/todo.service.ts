@@ -4,56 +4,50 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { LessThan, Repository } from 'typeorm';
+import { PubSub } from 'graphql-subscriptions';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
-import { CreateTodoInput } from './dto/createTodo.input';
-import { UpdateTodoInput } from './dto/updateTodo.input';
+import { CreateTodoInput } from './inputs/create-todo.input';
+import { UpdateTodoInput } from './inputs/update-todo.input';
 import { TodoStatus } from './types/todoStatus.enum';
 import { TodoEntity } from './models/todo.entity';
 import { UserService } from '../user/user.service';
 import { CategoryService } from '../category/category.service';
-import { FilesService } from '../shared/services/files.service';
-import { Upload } from '../shared/entities/upload';
+import { Upload } from '../shared/classes/upload';
 import { MediaService } from '../media/media.service';
-import { PubSub } from 'graphql-subscriptions';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { GqlSubscriptionsEnum } from '../shared/constants/gql-subscriptions.enum';
+import { BasicService } from '../shared/services/basic.service';
+import { UserEntity } from '../user/models/user.entity';
 
 @Injectable()
-export class TodoService {
+export class TodoService extends BasicService<TodoEntity> {
   constructor(
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
+    private readonly moduleRef: ModuleRef,
     @InjectRepository(TodoEntity)
     private todoRepository: Repository<TodoEntity>,
     private userService: UserService,
     private categoryService: CategoryService,
-    private filesService: FilesService,
     private mediaService: MediaService,
-  ) {}
+  ) {
+    super(todoRepository);
+  }
 
   async getTodos(userId: number): Promise<TodoEntity[]> {
-    return this.todoRepository.find({
+    return this.find({
       where: { author: userId },
       relations: ['author'],
     });
   }
 
-  async getTodoById(id: number): Promise<TodoEntity> {
-    const todo = await this.todoRepository.findOne(id, {
+  async getTodoById(id: number, userId?: number): Promise<TodoEntity> {
+    return this.findOne(id, {
       relations: ['author'],
-    });
-    if (!todo) {
-      throw new NotFoundException();
-    }
-    return todo;
-  }
-
-  async getTodoByName(title: string, userId: number): Promise<TodoEntity> {
-    return this.todoRepository.findOne({
       where: {
-        title,
         author: userId,
       },
     });
@@ -61,9 +55,8 @@ export class TodoService {
 
   async createTodo(
     createTodoInput: CreateTodoInput,
-    userId: number,
+    user: UserEntity,
   ): Promise<TodoEntity> {
-    const user = await this.userService.getUserById(userId);
     const categories = await this.categoryService.getCategoriesByName(
       createTodoInput.categories,
     );
@@ -78,6 +71,7 @@ export class TodoService {
     const createdTodo = await this.todoRepository.create(todoForDb);
     const newTodo = await this.todoRepository.save(createdTodo);
     await this.categoryService.assignTodo(newTodo, categories);
+    console.log(newTodo);
     return newTodo;
   }
 
@@ -104,7 +98,7 @@ export class TodoService {
   }
 
   async removeTodo(id: number): Promise<TodoEntity> {
-    const todo = await this.getTodoById(id);
+    const todo = await this.getTodoById(id, 1);
     for await (const { id } of todo.images) {
       await this.mediaService.delete(id);
     }
@@ -146,22 +140,10 @@ export class TodoService {
     }
     for await (const file of files) {
       const url = await this.mediaService.create(file);
-      const image = await this.filesService.saveUploadResult({ Location: url });
-      images.push(image);
+      // const image = await this.filesService.saveUploadResult({ Location: url });
+      // images.push(image);
     }
     todo.images = [...todo.images, ...images];
     return this.todoRepository.save(todo);
-  }
-
-  async getTodosCountByStatus(
-    userId: number,
-    status: TodoStatus,
-  ): Promise<number> {
-    return this.todoRepository.count({
-      where: {
-        status,
-        author: userId,
-      },
-    });
   }
 }

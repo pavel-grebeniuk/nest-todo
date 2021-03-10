@@ -1,6 +1,5 @@
-import { Context, ResolveField, Resolver, Subscription } from '@nestjs/graphql';
+import { ResolveField, Resolver, Subscription } from '@nestjs/graphql';
 import { TodoSubscription } from './models/todo.subscription.model';
-import { UserEntity } from '../user/models/user.entity';
 import { TodoService } from './todo.service';
 
 @Resolver(() => TodoSubscription)
@@ -23,7 +22,7 @@ export class TodoSubscriptionResolver {
   }
 
   @ResolveField()
-  async expiredTodos(@Context('user') { id }: UserEntity): Promise<unknown> {
+  async expiredTodos(): Promise<unknown> {
     return this.todoService.getExpiredTodos();
   }
 }

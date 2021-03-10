@@ -1,16 +1,16 @@
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany } from 'typeorm';
 
 import { TodoEntity } from '../../todo/models/todo.entity';
+import { BasicEntity } from '../../shared/entities/basic.entity';
 
 @ObjectType('Category')
 @Entity('categories')
-export class CategoryEntity {
-  @PrimaryGeneratedColumn()
+export class CategoryEntity extends BasicEntity {
   @Field(() => ID)
   id: number;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   @Column({ length: 200 })
   name: string;
 

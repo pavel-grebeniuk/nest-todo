@@ -6,20 +6,25 @@ type UserEntity {
   id: ID!
   name: String!
   email: String!
+  token: String
   todos: [Todo!]!
 }
 
 type Category {
   id: ID!
-  name: String
+  name: String!
   todos: [Todo]!
   newTodosCount: Float!
   expiredTodosCount: Float!
 }
 
-type File {
+"""Media file"""
+type Media {
+  id: ID
   url: String!
-  key: String!
+  fileName: String
+  mimetype: String
+  size: Int
 }
 
 type Todo {
@@ -30,7 +35,7 @@ type Todo {
   expiredDate: String
   author: UserEntity!
   category: [Category!]!
-  images: [File!]!
+  images: [Media!]!
 }
 
 enum TodoStatus {
@@ -49,7 +54,11 @@ type TodoQuery {
   todos: [Todo!]!
 
   """Get todo by id"""
-  todoById(id: Float!): Todo!
+  todoById(args: TodoIdInput!): Todo!
+}
+
+input TodoIdInput {
+  id: Float!
 }
 
 type TodoMutation {
@@ -126,6 +135,11 @@ type User {
   todos: [Todo!]!
   expiredTodosCount: Float!
   completedTodosCount: Float!
+}
+
+type File {
+  url: String!
+  key: String!
 }
 
 type Query {

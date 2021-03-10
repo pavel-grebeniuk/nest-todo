@@ -1,58 +1,97 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { Repository } from 'typeorm';
 
 import { UserService } from '../user/user.service';
-import { UserEntity } from '../user/models/user.entity';
-import { SignUpInput } from './dto/sign-up.dto';
-import { SignInInput } from './dto/sign-in.dto';
+import { SignUpInput } from './inputs/sign-up.input';
+import { SignInInput } from './inputs/sign-in.input';
+import { BasicService } from '../shared/services/basic.service';
+import { AuthEntity } from './models/auth.entity';
 
 @Injectable()
-export class AuthService {
+export class AuthService extends BasicService<AuthEntity> {
+  private jwtSecret = this.configService.get('JWT_SECRET');
   constructor(
+    @InjectRepository(AuthEntity) authRepository: Repository<AuthEntity>,
     private userService: UserService,
     private jwtService: JwtService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    super(authRepository);
+  }
 
-  async signIn({ email, password }: SignInInput): Promise<string> {
-    const user = await this.validateUser(email, password);
-    const token = await this.generateToken(user);
+  getToken(authHeader?: string) {
+    if (!authHeader) {
+      return;
+    }
+    const match = authHeader.match(/[Bb]earer (?<token>.*)/);
+    if (!match) {
+      return;
+    }
+    const { token } = match.groups;
     return token;
+  }
+
+  verifyToken(token: string) {
+    try {
+      return this.jwtService.verify(
+        token,
+        this.configService.get('JWT_SECRET'),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async signToken() {
+    return this.jwtService.sign({}, { secret: this.jwtSecret });
   }
 
   async signUp(createUserInput: SignUpInput): Promise<string> {
-    const user = await this.userService.createUser(createUserInput);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    const token = await this.generateToken(user);
+    const cryptedPass = await this.generatePasswordHash(
+      createUserInput.password,
+    );
+    const token = await this.signToken();
+    const user = await this.userService.create({
+      ...createUserInput,
+      password: cryptedPass,
+      tokens: [{ token }],
+    });
+    await this.userService.save(user);
     return token;
   }
 
-  //todo add custom validator class
-  private async validateUser(email: string, password: string) {
-    const user = await this.userService.findUser(email);
-    if (!user) {
-      throw new NotFoundException(`User ${email} not found`);
-    }
-    const isPasswordValid = await this.checkPassword(password, user.password);
-    if (isPasswordValid) {
-      return user;
-    } else {
-      throw new UnauthorizedException();
-    }
+  async signIn(input: SignInInput): Promise<string> {
+    const user = await this.checkAuthorization(input);
+    const token = await this.signToken();
+    const allTokens = await user.tokens;
+    user.tokens = Promise.resolve([...allTokens, { token }]);
+    await this.userService.save(user);
+    return token;
   }
 
-  private async checkPassword(password, userPassword): Promise<boolean> {
-    return bcrypt.compare(password, userPassword);
+  private async checkAuthorization(input: SignInInput) {
+    const user = await this.userService.findOne({
+      email: input.email,
+    });
+
+    const isPasswordValid = await bcrypt.compare(input.password, user.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('PASSWORD_NOT_VALID');
+    }
+    return user;
   }
 
-  private async generateToken(user: Partial<UserEntity>) {
-    const { email, id } = user;
-    return this.jwtService.sign({ email, id });
+  private generatePasswordHash(pass: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      bcrypt.hash(pass, 10, (err, hash) => {
+        if (err) reject(err);
+        resolve(hash);
+      });
+    });
   }
 }

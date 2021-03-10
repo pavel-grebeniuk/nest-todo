@@ -1,7 +1,8 @@
-import { Context, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { UserQuery } from './models/user.query.model';
 import { UserService } from './user.service';
 import { UserEntity } from './models/user.entity';
+import { ActiveUser } from '../shared/decorators/user.decorator';
 
 @Resolver(() => UserQuery)
 export class UserQueryResolver {
@@ -12,7 +13,7 @@ export class UserQueryResolver {
   }
 
   @ResolveField()
-  async getUserInfo(@Context('user') { id }: UserEntity) {
+  async getUserInfo(@ActiveUser('user') { id }: UserEntity) {
     return this.userService.getUserById(id);
   }
 }

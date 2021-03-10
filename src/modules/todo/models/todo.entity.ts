@@ -9,15 +9,14 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CategoryEntity } from '../../category/models/category.entity';
-import { PublicFile } from '../../shared/entities/publicFile.entity';
+import { BasicEntity } from '../../shared/entities/basic.entity';
+import { Media } from '../../media/models/media.entity';
 
 @ObjectType('Todo')
 @Entity('todos')
-export class TodoEntity {
-  @PrimaryGeneratedColumn()
+export class TodoEntity extends BasicEntity {
   @Field(() => ID)
   id: number;
 
@@ -53,10 +52,10 @@ export class TodoEntity {
   @JoinTable({ name: 'todos_categories' })
   category: CategoryEntity[];
 
-  @Field(() => [PublicFile])
-  @OneToMany(() => PublicFile, (publicFile) => publicFile.todo, {
+  @Field(() => [Media])
+  @OneToMany(() => Media, (media) => media.todo, {
     eager: true,
     nullable: true,
   })
-  images?: PublicFile[];
+  images?: Media[];
 }

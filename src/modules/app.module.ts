@@ -1,16 +1,20 @@
-import { Module, UnauthorizedException } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ContextModule } from '@2muchcoffee/nestjs-context';
 
 import * as ormOptions from '../ormconfig';
 import { SharedModule } from './shared/shared.module';
 import { configSchema } from './shared/config/config.schema';
 import { GqlConfigService } from './shared/services/gql-config.service';
+import { AuthMiddleware } from './shared/middleware/auth.middleware';
+import { AuthResolver } from './auth/auth.resolver';
 
 @Module({
   imports: [
+    ContextModule,
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: configSchema,
@@ -32,4 +36,8 @@ import { GqlConfigService } from './shared/services/gql-config.service';
     SharedModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('*');
+  }
+}

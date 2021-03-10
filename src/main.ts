@@ -4,6 +4,7 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { config } from 'aws-sdk';
 import { useContainer } from 'class-validator';
+import { TransformUploadPipe } from './modules/shared/pipes/transform-upload.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,12 +12,14 @@ async function bootstrap() {
   const port = configService.get('PORT', 3000);
 
   app.useGlobalPipes(
+    new TransformUploadPipe(),
     new ValidationPipe({
       whitelist: true,
       transform: true,
       exceptionFactory: (errors) => new BadRequestException(errors),
     }),
   );
+
   app.enableCors();
   config.update({
     accessKeyId: configService.get('AWS_ACCESS_KEY_ID'),
@@ -27,6 +30,7 @@ async function bootstrap() {
     fallback: true,
     fallbackOnErrors: true,
   });
+
   await app.listen(port);
 
   console.log(`🚀 Application is running on port ${port}`);

@@ -1,18 +1,14 @@
-import {
-  Args,
-  Context,
-  Mutation,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Mutation, ResolveField, Resolver } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { TodoMutation } from './models/todo.mutation.model';
 import { TodoService } from './todo.service';
-import { TodoEntity } from './models/todo.entity';
-import { DefaultCategoryPipe } from '../category/pipes/defaultCategory.pipe';
 import { UserEntity } from '../user/models/user.entity';
-import { CreateTodoInput } from './dto/createTodo.input';
-import { UpdateTodoInput } from './dto/updateTodo.input';
+import { CreateTodoInput } from './inputs/create-todo.input';
+import { UpdateTodoInput } from './inputs/update-todo.input';
+import { ActiveUser } from '../shared/decorators/user.decorator';
+import { AuthGuard } from '../shared/guards/auth.guard';
 
+@UseGuards(AuthGuard)
 @Resolver(() => TodoMutation)
 export class TodoMutationResolver {
   constructor(private readonly todoService: TodoService) {}
@@ -23,18 +19,13 @@ export class TodoMutationResolver {
 
   @ResolveField()
   async createTodo(
-    //todo replace pipes to custom validator
-    @Args(
-      'input',
-      // DefaultCategoryPipe,
-      // UniqTodoNamePipe,
-      // TransformUploadPipe,
-    )
+    @Args('input')
     input: CreateTodoInput,
-    // @Context('user') { id: userId }: UserEntity,
+    @ActiveUser('user') user: UserEntity,
   ) {
-    const { id } = await this.todoService.createTodo(input, 1);
-    return this.todoService.saveImages(input.media, id);
+    const todo = await this.todoService.createTodo(input, user);
+    await this.todoService.saveImages(input.media, todo.id);
+    return todo;
   }
 
   @ResolveField()

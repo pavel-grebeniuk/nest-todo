@@ -1,7 +1,7 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import { IsEnum, IsOptional } from 'class-validator';
 
-import { CreateTodoInput } from './createTodo.input';
+import { CreateTodoInput } from './create-todo.input';
 import { TodoStatus } from '../types/todoStatus.enum';
 
 @InputType()
