@@ -14,7 +14,6 @@ export class CategoryEntity extends BasicEntity {
   @Column({ length: 200 })
   name: string;
 
-  @Field(() => [TodoEntity], { nullable: 'items' })
   @ManyToMany(() => TodoEntity, (todo) => todo.category)
   todos: TodoEntity[];
 

@@ -40,13 +40,11 @@ export class TodoService extends BasicService<TodoEntity> {
   async getTodos(userId: number): Promise<TodoEntity[]> {
     return this.find({
       where: { author: userId },
-      relations: ['author'],
     });
   }
 
   async getTodoById(id: number, userId?: number): Promise<TodoEntity> {
     return this.findOne(id, {
-      relations: ['author'],
       where: {
         author: userId,
       },
@@ -58,14 +56,12 @@ export class TodoService extends BasicService<TodoEntity> {
     user: UserEntity,
   ): Promise<TodoEntity> {
     const { categories, media, ...entityData } = input;
-    const todo = await this.todoRepository.merge(new TodoEntity(), {
-      ...entityData,
-      author: user,
-    });
+    const todo = await this.todoRepository.merge(new TodoEntity(), entityData);
     const categoryList = await this.categoryService.getCategoriesByName(
       categories,
     );
     const images = await this.saveImages(media);
+    todo.author = user;
     todo.category = categoryList;
     todo.images = images;
     return this.todoRepository.save(todo);
@@ -92,7 +88,8 @@ export class TodoService extends BasicService<TodoEntity> {
   async removeTodo(id: number, userId: number): Promise<TodoEntity> {
     const todo = await this.getTodoById(id, userId);
     if (!todo) throw new NotFoundException();
-    await this.mediaService.delete(todo.images);
+    const images = await todo.images;
+    await this.mediaService.delete(images);
     await this.todoRepository.remove(todo);
     return { ...todo, id };
   }
@@ -104,7 +101,6 @@ export class TodoService extends BasicService<TodoEntity> {
         status: TodoStatus.NEW,
         expiredDate: LessThan(moment().toISOString()),
       },
-      relations: ['author'],
     });
     if (todos.length) {
       todos.forEach((todo) => (todo.status = TodoStatus.EXPIRED));

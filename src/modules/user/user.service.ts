@@ -15,8 +15,6 @@ export class UserService extends BasicService<UserEntity> {
   }
 
   async getUserById(id: number): Promise<UserEntity> {
-    return this.userRepository.findOne(id, {
-      relations: ['todos'],
-    });
+    return this.userRepository.findOne(id);
   }
 }

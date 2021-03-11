@@ -41,21 +41,24 @@ export class TodoEntity extends BasicEntity {
   expiredDate?: string;
 
   @Field(() => UserEntity)
-  @ManyToOne(() => UserEntity, (user) => user.todos)
-  author?: UserEntity;
+  @ManyToOne(() => UserEntity, (user) => user.todos, {
+    lazy: true,
+    cascade: true,
+  })
+  author?: UserEntity | Promise<UserEntity>;
 
   @Field(() => [CategoryEntity])
   @ManyToMany(() => CategoryEntity, (category) => category.todos, {
-    eager: true,
+    lazy: true,
     cascade: true,
   })
   @JoinTable({ name: 'todos_categories' })
-  category: CategoryEntity[];
+  category: CategoryEntity[] | Promise<CategoryEntity[]>;
 
   @Field(() => [Media])
   @OneToMany(() => Media, (media) => media.todo, {
-    eager: true,
+    lazy: true,
     nullable: true,
   })
-  images?: Media[];
+  images?: Media[] | Promise<Media[]>;
 }

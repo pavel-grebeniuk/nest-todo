@@ -33,6 +33,8 @@ export class UserEntity extends BasicEntity {
   tokens: AuthEntity[] | Promise<AuthEntity[]>;
 
   @Field(() => [TodoEntity])
-  @OneToMany(() => TodoEntity, (todo) => todo.author)
-  todos: TodoEntity[];
+  @OneToMany(() => TodoEntity, (todo) => todo.author, {
+    lazy: true,
+  })
+  todos: TodoEntity[] | Promise<TodoEntity[]>;
 }

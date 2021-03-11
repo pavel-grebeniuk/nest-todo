@@ -13,7 +13,6 @@ type UserEntity {
 type Category {
   id: ID!
   name: String!
-  todos: [Todo]!
   newTodosCount: Float!
   expiredTodosCount: Float!
 }
