@@ -1,4 +1,4 @@
-import { Args, Context, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { TodoQuery } from './models/todo.query.model';
 import { TodoService } from './todo.service';
 import { TodoEntity } from './models/todo.entity';

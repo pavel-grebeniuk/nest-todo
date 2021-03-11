@@ -12,6 +12,7 @@ import { PubSubProvider } from './providers/pub-sub.provider';
 import { StorageService } from './services/storage.service';
 import { ShouldExistValidator } from './validators/should-exist.validator';
 import { AuthGuard } from './guards/auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 const modules = [
   AuthModule,
@@ -23,7 +24,7 @@ const modules = [
 
 const services = [StorageService];
 
-const providers = [PubSubProvider, ShouldExistValidator, AuthGuard];
+const providers = [PubSubProvider, ShouldExistValidator, AuthGuard, RolesGuard];
 
 @Global()
 @Module({

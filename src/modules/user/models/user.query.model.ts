@@ -5,4 +5,7 @@ import { UserEntity } from './user.entity';
 export class UserQuery {
   @Field(() => UserEntity, { description: 'Get current user' })
   getUserInfo: UserEntity;
+
+  @Field(() => UserEntity, { description: 'Get user by id' })
+  getUserById: UserEntity;
 }

@@ -10,7 +10,6 @@ import { SharedModule } from './shared/shared.module';
 import { configSchema } from './shared/config/config.schema';
 import { GqlConfigService } from './shared/services/gql-config.service';
 import { AuthMiddleware } from './shared/middleware/auth.middleware';
-import { AuthResolver } from './auth/auth.resolver';
 
 @Module({
   imports: [

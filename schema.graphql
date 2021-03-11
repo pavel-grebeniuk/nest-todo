@@ -6,8 +6,15 @@ type UserEntity {
   id: ID!
   name: String!
   email: String!
+  role: UserRole!
   token: String
   todos: [Todo!]!
+}
+
+"""User roles"""
+enum UserRole {
+  ADMIN
+  USER
 }
 
 type Category {
@@ -46,6 +53,23 @@ enum TodoStatus {
 type UserQuery {
   """Get current user"""
   getUserInfo: UserEntity!
+
+  """Get user by id"""
+  getUserById(input: UserIdInput!): UserEntity!
+}
+
+input UserIdInput {
+  id: Float!
+}
+
+type UserMutation {
+  """Change user role"""
+  changeRole(input: ChangeRoleInput!): UserEntity!
+}
+
+input ChangeRoleInput {
+  id: Float!
+  role: UserRole!
 }
 
 type TodoQuery {
@@ -142,6 +166,7 @@ type Query {
 type Mutation {
   auth: AuthMutation!
   todo: TodoMutation!
+  user: UserMutation!
 }
 
 type Subscription {
