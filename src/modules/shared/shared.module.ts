@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
 
 import { TodoModule } from '../todo/todo.module';
 import { TransformUploadPipe } from './pipes/transform-upload.pipe';
@@ -34,7 +35,15 @@ const providers = [PubSubProvider, ShouldExistValidator, AuthGuard, RolesGuard];
     }),
     ...modules,
   ],
-  providers: [...services, ...providers, TransformUploadPipe],
+  providers: [
+    ...services,
+    ...providers,
+    TransformUploadPipe,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
   exports: [
     TransformUploadPipe,
     ...modules,

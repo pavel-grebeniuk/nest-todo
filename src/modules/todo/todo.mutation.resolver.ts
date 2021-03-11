@@ -9,7 +9,7 @@ import { ActiveUser } from '../shared/decorators/user.decorator';
 import { AuthGuard } from '../shared/guards/auth.guard';
 import { TodoIdInput } from './inputs/todo-id.input';
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Resolver(() => TodoMutation)
 export class TodoMutationResolver {
   constructor(private readonly todoService: TodoService) {}

@@ -8,7 +8,7 @@ import { UserEntity } from '../user/models/user.entity';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../shared/guards/auth.guard';
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Resolver(() => TodoQuery)
 export class TodoQueryResolver {
   constructor(private readonly todoService: TodoService) {}
